@@ -2,6 +2,7 @@
 import { StyleSheet, Text, View, Image, useWindowDimensions, ImageBackground } from 'react-native';
 import Logo from '../assets/virtual.png';
 import React from 'react';
+import { AntDesign, FontAwesome, FontAwesome5, MaterialCommunityIcons, Octicons } from "@expo/vector-icons";
 
 const SignInScreen = ({ navigation }) => {
   const { height } = useWindowDimensions();
@@ -18,7 +19,7 @@ const SignInScreen = ({ navigation }) => {
 
   return (
     <ImageBackground
-      source={require('../assets/bg1.jpeg')}
+      source={require('../assets/wallpapermain.jpg')}
       style={styles.background}
     >
       <View style={styles.root}>

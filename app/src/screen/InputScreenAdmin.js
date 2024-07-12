@@ -8,11 +8,9 @@ import { useNavigation } from "@react-navigation/native";
 import { AntDesign, FontAwesome, FontAwesome5, MaterialCommunityIcons, Octicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-import HomeScreen from "./HomeScreen";
+import HomeScreenAdmin from "./HomeScreenAdmin";
 import StatusScreen from "./StatusScreen";
 import NewScreen from "./NewScreen";
-
-
 
 const InputScreen = () => {
   const navigation = useNavigation();
@@ -35,7 +33,7 @@ const InputScreen = () => {
   };
 
   const handleProceed = () => {
-    setModalVisible(true);
+    //setModalVisible(true);
   };
 
   const handleConfirm = () => {
@@ -64,8 +62,9 @@ const InputScreen = () => {
   };
   const handleLogout = () => {
     setProfileModalVisible(false); //
-    navigation.navigate('SIGNINNEW'); // Replace 'Login' with the name of your login screen
+    navigation.navigate('LOGINA');
   };
+
   
 
   return (
@@ -79,90 +78,10 @@ const InputScreen = () => {
           <View style={[styles.onlineIndicator, { backgroundColor: 'green' }]} />
         </TouchableOpacity>
         <View style={styles.textContainer}>
-          <Text style={styles.headingText}>Internship Details</Text>
+          <Text style={styles.headingText}>Intern Letter</Text>
         </View>
         <ScrollView style={styles.scrollView}>
           <View style={styles.formContainer}>
-            <View style={styles.inputContainer}>
-              <FontAwesome5 name={"portrait"} size={30} color={colors.primary} style={styles.icon}  />
-              <TextInput
-                style={styles.textInput}
-                placeholder="Enter your Name"
-                placeholderTextColor={colors.secondary}
-                keyboardType="default"
-                value={name}
-                onChangeText={setName}
-              />
-            </View>
-            <View style={styles.inputContainer}>
-              <Ionicons name={"mail-outline"} size={30} color={colors.primary}style={styles.icon}  />
-              <TextInput
-                style={styles.textInput}
-                placeholder="Enter your email"
-                placeholderTextColor={colors.secondary}
-                keyboardType="email-address"
-                value={email}
-                onChangeText={setEmail}
-              />
-            </View>
-            <View style={styles.inputContainer}>
-              <AntDesign name={"idcard"} size={30} color={colors.primary} style={styles.icon} />
-              <TextInput
-                style={styles.textInput}
-                placeholder="Student ID"
-                placeholderTextColor={colors.secondary}
-                keyboardType="phone-pad"
-                value={studentId}
-                onChangeText={setStudentId}
-              />
-            </View>
-            <View style={styles.inputContainer}>
-              <MaterialCommunityIcons name={"book-education-outline"} size={30} color={colors.primary}style={styles.icon}  />
-              <TextInput
-                style={styles.textInput}
-                placeholder="Enter your Course"
-                placeholderTextColor={colors.secondary}
-                keyboardType="default"
-                value={course}
-                onChangeText={setCourse}
-              />
-            </View>
-            <View style={styles.inputContainer}>
-              <Octicons name={"number"} size={30} color={colors.primary} style={styles.icon} />
-              <TextInput
-                style={styles.textInput}
-                placeholder="Enter your Index No"
-                placeholderTextColor={colors.secondary}
-                keyboardType="phone-pad"
-                value={indexNo}
-                onChangeText={setIndexNo}
-              />
-            </View>
-            <View style={styles.inputContainer}>
-              <SimpleLineIcons name={"screen-smartphone"} size={30} color={colors.primary} style={styles.icon} />
-              <TextInput
-                style={styles.textInput}
-                placeholder="Enter your Level"
-                placeholderTextColor={colors.secondary}
-                keyboardType="phone-pad"
-                value={level}
-                onChangeText={setLevel}
-              />
-            </View>
-           
-            <View style={[styles.inputContainer, styles.multilineInput1]}>
-            <FontAwesome5 name={"warehouse"} size={30} color={colors.primary} style={styles.icon} />
-              <TextInput
-                style={styles.textInput}
-                placeholder="Company Name"
-                placeholderTextColor='#696969'
-                keyboardType="default"
-                value={companyName}
-                onChangeText={setCompanyName}
-                placeholderStyle={styles.placeholder}
-                multiline={true}
-              />
-            </View>
             <View style={[styles.inputContainer, styles.multilineInput]}>
               <FontAwesome name={"address-book-o"} size={30} color={colors.primary} style={styles.icon}  />
         
@@ -176,38 +95,14 @@ const InputScreen = () => {
                 multiline={true}
               />
             </View>
-            <TouchableOpacity style={styles.proceedButtonWrapper} onPress={handleProceed}>
+            <TouchableOpacity style={styles.proceedButtonWrapper} >
               <Text style={styles.proceedText}>Proceed</Text>
             </TouchableOpacity>
           </View>
 
        
         </ScrollView>
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(!modalVisible);
-          }}
-        >
-          <View style={styles.modalView}>
-            <Text style={styles.modalTitle}>Confirm Your Details</Text>
-            <ScrollView style={styles.modalContent}>
-              <Text style={styles.modalText}>Name: {name}</Text>
-              <Text style={styles.modalText}>Email: {email}</Text>
-              <Text style={styles.modalText}>Student ID: {studentId}</Text>
-              <Text style={styles.modalText}>Course: {course}</Text>
-              <Text style={styles.modalText}>Index No: {indexNo}</Text>
-              <Text style={styles.modalText}>Level: {level}</Text>
-              <Text style={styles.modalText}>Company Name: {companyName}</Text>
-              <Text style={styles.modalText}>Company Address: {companyAddress}</Text>
-            </ScrollView>
-            <TouchableOpacity style={styles.confirmButtonWrapper} onPress={handleConfirm}>
-              <Text style={styles.confirmText}>Confirm</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
+       
         <Modal
           animationType="slide"
           transparent={true}
@@ -224,38 +119,36 @@ const InputScreen = () => {
      
       <ScrollView contentContainerStyle={styles.profileContent}>
         <FontAwesome5 name={"user-circle"} size={120} color={colors.primary} />
+        <Text style={styles.adminText}>Admin</Text>
        
         <View style={styles.profileRow}>
           <Text style={styles.profileLabel}>Surname:</Text>
-          <Text style={styles.profileValue}> Aryee</Text>
+          <Text style={styles.profileValue}> Aquah</Text>
         </View>
         <View style={styles.profileRow}>
           <Text style={styles.profileLabel}>Other names:</Text>
-          <Text style={styles.profileValue}>Othniel Nii Dodou</Text>
+          <Text style={styles.profileValue}>Hayfron Kofi J.</Text>
         </View>
-        <View style={styles.profileRow}>
-          <Text style={styles.profileLabel}>Gender:</Text>
-          <Text style={styles.profileValue}>Male</Text>
-        </View>
+      
         <View style={styles.profileRow}>
           <Text style={styles.profileLabel}>Region:</Text>
           <Text style={styles.profileValue}>Ashanti</Text>
         </View>
         <View style={styles.profileRow}>
-          <Text style={styles.profileLabel}>Current Year:</Text>
-          <Text style={styles.profileValue}>300</Text>
+          <Text style={styles.profileLabel}>Status:</Text>
+          <Text style={styles.profileValue}>H.O.D</Text>
         </View>
         <View style={styles.profileRow}>
-          <Text style={styles.profileLabel}>Student ID:</Text>
-          <Text style={styles.profileValue}>20824926</Text>
+          <Text style={styles.profileLabel}>Staff ID:</Text>
+          <Text style={styles.profileValue}>5645648</Text>
         </View>
         <View style={styles.profileRow}>
           <Text style={styles.profileLabel}>Email:</Text>
-          <Text style={styles.profileValue}>aryeeothniel@gmail.com</Text>
+          <Text style={styles.profileValue}>ahayfronquah@sf.knust.edu.gh</Text>
         </View>
         <View style={styles.profileRow}>
           <Text style={styles.profileLabel}>Phone Number:</Text>
-          <Text style={styles.profileValue}>+233 203823354</Text>
+          <Text style={styles.profileValue}>+233 505568677</Text>
         </View>
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.logoutText}>Logout</Text>
@@ -276,7 +169,7 @@ const Tab = createBottomTabNavigator();
 const InputScreenWithTabs = () => {
   return (
     <ImageBackground source={require('../assets/wallpapertemp.jpg')} style={styles.backgroundImage}>
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarStyle: {
@@ -301,11 +194,11 @@ const InputScreenWithTabs = () => {
             iconName = 'home';
             IconComponent = AntDesign;
           } else if (route.name === 'New Request') {
-            iconName = 'wpforms';
-            IconComponent = FontAwesome;
+            iconName = "file-document" ;
+            IconComponent = MaterialCommunityIcons;
           } else if (route.name === 'Progress') {
-            iconName = 'clock-o';
-            IconComponent = FontAwesome;
+            iconName = "database";
+            IconComponent = MaterialCommunityIcons;
           }
 
           return (
@@ -315,10 +208,11 @@ const InputScreenWithTabs = () => {
           );
         },
       })}
+      
     >
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        component={HomeScreenAdmin}
         options={{
           headerShown: false,
           tabBarLabel: 'Home', // Label for the tab
@@ -329,20 +223,20 @@ const InputScreenWithTabs = () => {
         component={InputScreen}
         options={{
           headerShown: false,
-          tabBarLabel: 'New Request', // Label for the tab
+          tabBarLabel: 'Generate Letter', // Label for the tab
         }}
       />
       <Tab.Screen
         name="Progress"
-        component={NewScreen}
+        component={StatusScreen}
         options={{
           headerShown: false,
-          tabBarLabel: 'Status', // Label for the tab
+          tabBarLabel: 'Intern Data', // Label for the tab
         }}
       />
     </Tab.Navigator>
 
-    </KeyboardAvoidingView>
+  
     </ImageBackground>
   );
 };
@@ -356,6 +250,15 @@ const styles = StyleSheet.create({
     resizeMode: 'cover', // or 'stretch'
 
   backgroundImage: `url('../assets/wallpapertemp.jpg')`,
+  },
+  adminText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.primary, // Example color
+    padding: 10,
+    //backgroundColor: '#000', // Background color
+    borderRadius: 5, // Rounded corners
+    textAlign: 'center', // Centered text
   },
 
   onlineIndicator: {

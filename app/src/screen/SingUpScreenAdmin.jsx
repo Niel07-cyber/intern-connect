@@ -8,65 +8,29 @@ import {
   View,
   ActivityIndicator,
   ImageBackground,
-  SafeAreaView,
+  Linking,
   ScrollView, // Import ScrollView
-  Linking
 } from "react-native";
 import { colors } from "../utils/colors";
 import { fonts } from "../utils/fonts";
+
 import Ionicons from "react-native-vector-icons/Ionicons";
 import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
 import { useNavigation } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
-import { AntDesign } from "@expo/vector-icons";
-import { FontAwesome, FontAwesome6 } from "@expo/vector-icons";
-import { firebase } from "../../../config";
+import { AntDesign, FontAwesome6 } from "@expo/vector-icons";
 
-const SignupScreen = () => {
+const SignupScreenAdmin = () => {
   const navigation = useNavigation();
   const [secureEntry, setSecureEntry] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [Email, setEmail] = useState('')
-  const [Password, setPassword] = useState('')
-  const [FirstName, setFirstName] = useState('')
-  const [LastName, setLastName] = useState('')
 
-  registerUser = async (email, password, firstName, lastName) => {
-  await firebase.auth().createUserWithEmailAndPassword(Email, Password)
-  .then(() => {
-      firebase.auth().currentUser.sendEmailVerification({
-          handleCodeInApp: true,
-          url:'https://internconnect-c39a4.firebaseapp.com',
-      })
-      .then(() => {
-        alert('Verification email sent')     
-       }).catch((error) => {
-        alert(error.message)
-       })
-       .then(() => {
-        firebase.firestore().collection('users')
-        .doc(firebase.auth().currentUser.uid)
-        .set({
-          FirstName,
-          LastName,
-          Email,
-        })
-       })
-       .catch((error) => {
-        alert(error.message)
-       })
-  })
-.catch((error => {
-  alert(error.message)
-}))
-
-  }
   const handleGoBack = () => {
     navigation.goBack();
   };
 
   const handleLogin = () => {
-    navigation.navigate("LOGIN");
+    navigation.navigate("LOGINA");
   };
 
   const handleSignUp = () => {
@@ -74,39 +38,38 @@ const SignupScreen = () => {
     setTimeout(() => {
       setLoading(false);
       Toast.show({
-        type: 'success',
-        text1: 'Check your email to verify your account',
+        type: "success",
+        text1: "Your account has been successfully created",
       });
-    }, 2000);
+    }, 3000);
   };
 
   const handleOpenLink = () => {
-    Linking.openURL("https://apps.knust.edu.gh/students"); // Replace with your desired URL
+    Linking.openURL("https://apps.knust.edu.gh/Staff/Account/LogOn?ReturnUrl=%2FStaffs"); // Replace with your desired URL
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ImageBackground
-        source={require("../assets/wallpapermain.jpg")}
-        style={styles.backgroundImage}
-        resizeMode="cover"
-      >
-        <ScrollView contentContainerStyle={styles.scrollViewContent}>
-          <View style={styles.innerContainer}>
-            <TouchableOpacity style={styles.backButtonWrapper} onPress={handleGoBack}>
-              <Ionicons
-                name={"arrow-back-outline"}
-                color={colors.primary}
-                size={25}
-              />
-            </TouchableOpacity>
-            <View style={styles.textContainer}>
-              <Text style={styles.headingText}>Let's get</Text>
-              <Text style={styles.headingText}>started</Text>
-            </View>
-            <View style={styles.formContainer}>
+    <ImageBackground
+      source={require("../assets/wallpapertemp.jpg")} // Replace with your actual background image source
+      style={styles.backgroundImage}
+      resizeMode="cover"
+    >
+      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+        <View style={styles.container}>
+          <TouchableOpacity style={styles.backButtonWrapper} onPress={handleGoBack}>
+            <Ionicons
+              name={"arrow-back-outline"}
+              color={colors.primary}
+              size={25}
+            />
+          </TouchableOpacity>
+          <View style={styles.textContainer}>
+            <Text style={styles.headingText}>Let's get</Text>
+            <Text style={styles.headingText}>started</Text>
+          </View>
+          <View style={styles.formContainer}>
               <View style={styles.inputContainer}>
-              <SimpleLineIcons name="user" size={30} color={colors.primary} />
+              <FontAwesome6 name={"user"} size={30} color={colors.primary} />
                 <TextInput
                   style={styles.textInput}
                   placeholder="Enter your First Name"
@@ -118,7 +81,7 @@ const SignupScreen = () => {
               </View>
 
               <View style={styles.inputContainer}>
-              <SimpleLineIcons name="user" size={30} color={colors.primary} />
+              <FontAwesome6 name={"user"} size={30} color={colors.primary} />
                 <TextInput
                   style={styles.textInput}
                   placeholder="Enter your Last Name"
@@ -130,7 +93,11 @@ const SignupScreen = () => {
               </View>
 
               <View style={styles.inputContainer}>
-              <SimpleLineIcons name="envelope" size={30} color={colors.primary} />
+                <SimpleLineIcons
+                  name={"screen-smartphone"}
+                  size={30}
+                  color={colors.primary}
+                />
                 <TextInput
                   style={styles.textInput}
                   placeholder="Enter your Email"
@@ -159,57 +126,55 @@ const SignupScreen = () => {
                   <SimpleLineIcons name={"eye"} size={20} color={colors.secondary} />
                 </TouchableOpacity>
               </View>
-
-          
-              <TouchableOpacity
-                style={styles.loginButtonWrapper}
-                onPress={() =>registerUser(Email, Password, FirstName, LastName)}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator size="small" color={colors.white} />
-                ) : (
-                  <Text style={styles.loginText}>Sign up</Text>
-                )}
+            <TouchableOpacity
+              style={styles.loginButtonWrapper}
+              onPress={handleSignUp}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color={colors.white} />
+              ) : (
+                <Text style={styles.loginText}>Sign up</Text>
+              )}
+            </TouchableOpacity>
+            <Text style={styles.continueText}>or continue with</Text>
+            <TouchableOpacity style={styles.googleButtonContainer} onPress={handleOpenLink}>
+              <Image
+                source={require("../assets/KNUST.jpeg")}
+                style={styles.googleImage}
+              />
+              <Text style={styles.googleText}>Staff Portal</Text>
+            </TouchableOpacity>
+            <View style={styles.footerContainer}>
+              <Text style={styles.accountText}>Already have an account!</Text>
+              <TouchableOpacity onPress={handleLogin}>
+                <Text style={styles.signupText}>Login</Text>
               </TouchableOpacity>
-              <Text style={styles.continueText}>or continue with</Text>
-              <TouchableOpacity style={styles.googleButtonContainer} onPress={handleOpenLink}>
-                <Image
-                  source={require("../assets/KNUST.jpeg")}
-                  style={styles.googleImage}
-                />
-                <Text style={styles.googleText}>Student Portal</Text>
-              </TouchableOpacity>
-              <View style={styles.footerContainer}>
-                <Text style={styles.accountText}>Already have an account!</Text>
-                <TouchableOpacity onPress={handleLogin}>
-                  <Text style={styles.signupText}>Login</Text>
-                </TouchableOpacity>
-              </View>
             </View>
-            <Toast />
           </View>
-        </ScrollView>
-      </ImageBackground>
-    </SafeAreaView>
+          <Toast />
+        </View>
+      </ScrollView>
+    </ImageBackground>
   );
 };
 
-export default SignupScreen;
+export default SignupScreenAdmin;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.white, // Set background color as needed
-  },
-  innerContainer: {
-    flex: 1,
-    padding: 20, // Adjust padding as needed
-  },
   backgroundImage: {
     flex: 1,
     resizeMode: "cover",
     justifyContent: "center",
+  },
+  scrollViewContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingVertical: 20,
+  },
+  container: {
+    flex: 1,
+    padding: 20,
   },
   backButtonWrapper: {
     height: 40,
@@ -224,7 +189,7 @@ const styles = StyleSheet.create({
   },
   headingText: {
     fontSize: 32,
-    color: '#471710',
+    color: colors.primary,
     fontFamily: fonts.SemiBold,
   },
   formContainer: {
@@ -232,7 +197,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     borderWidth: 1,
-    borderColor: colors.secondary,
+    borderColor: colors.primary,
     borderRadius: 100,
     paddingHorizontal: 20,
     flexDirection: "row",
@@ -245,12 +210,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 10,
     fontFamily: fonts.Light,
-  },
-  forgotPasswordText: {
-    textAlign: "right",
-    color: colors.primary,
-    fontFamily: fonts.SemiBold,
-    marginVertical: 10,
   },
   loginButtonWrapper: {
     backgroundColor: '#FF6232',
@@ -305,10 +264,6 @@ const styles = StyleSheet.create({
   signupText: {
     color: colors.primary,
     fontFamily: fonts.Bold,
-    fontWeight: 'bold',
-  },
-  scrollViewContent: {
-    flexGrow: 1,
-    justifyContent: 'space-between',
+    fontWeight: "bold",
   },
 });

@@ -1,6 +1,6 @@
 export const colors = {
   white: '#FFFFFF',
-  primary: '#45484A',
-  secondary: '#AEB5BB',
+  primary: '#471710',
+  secondary: '#696969',
   gray: '#D9D9D9',
 };

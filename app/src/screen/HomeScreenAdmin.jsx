@@ -14,14 +14,14 @@ const fonts = {
   Medium: 'ArialMT', // Example font family
 };
 
-const HomeScreen = () => {
+const HomeScreenAdmin = () => {
   const navigation = useNavigation();
   const [titleWords, setTitleWords] = useState([]);
   const [subTitleWords, setSubTitleWords] = useState([]);
 
   useEffect(() => {
     animateText("Intern Connect", setTitleWords);
-    animateText("Welcome to InternConnect, Access to internship letters made fast, simple, and easy. Connect with HOD now!", setSubTitleWords);
+    animateText("Welcome to InternConnect, Send letters to Students fast and simple. Connect with your Students now!", setSubTitleWords);
   }, []);
 
   const animateText = (text, setTextWords) => {
@@ -43,19 +43,13 @@ const HomeScreen = () => {
         <Image source={require("../assets/logo.png")} style={styles.logo} />
         <Text style={styles.title}>{titleWords}</Text>
         <Text style={styles.subTitle}>{subTitleWords}</Text>
-        <View style={styles.logosContainer}>
-          <Image source={require("../assets/logo.png")} style={styles.logoImage} />
-          <Image source={require("../assets/logo.png")} style={styles.logoImage} />
-          <Image source={require("../assets/logo.png")} style={styles.logoImage} />
-          <Image source={require("../assets/logo.png")} style={styles.logoImage} />
-          <Image source={require("../assets/logo.png")} style={styles.logoImage} />
-        </View>
+      
       </View>
     </ImageBackground>
   );
 };
 
-export default HomeScreen;
+export default HomeScreenAdmin;
 
 const styles = StyleSheet.create({
   backgroundImage: {
