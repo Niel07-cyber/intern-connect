@@ -8,103 +8,131 @@ import {
   View,
   ActivityIndicator,
   ImageBackground,
+  SafeAreaView,
+  ScrollView,
   Linking,
-  ScrollView, // Import ScrollView
+  Alert
 } from "react-native";
 import { colors } from "../utils/colors";
 import { fonts } from "../utils/fonts";
-
 import Ionicons from "react-native-vector-icons/Ionicons";
 import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
 import { useNavigation } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
-import { AntDesign, FontAwesome6 } from "@expo/vector-icons";
+import { auth, db } from '../../../config';
+import { collection, addDoc } from "firebase/firestore";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 
 const SignupScreenAdmin = () => {
   const navigation = useNavigation();
   const [secureEntry, setSecureEntry] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
 
   const handleGoBack = () => {
     navigation.goBack();
   };
 
   const handleLogin = () => {
+    console.log("Navigating to LOGINA screen");
     navigation.navigate("LOGINA");
   };
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
+    if (!email || !password || !firstName || !lastName) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      Toast.show({
-        type: "success",
-        text1: "Your account has been successfully created",
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      await addDoc(collection(db, "admin"), { // Using 'admin' collection
+        uid: user.uid,
+        email,
+        firstName,
+        lastName,
+        createdAt: new Date()
       });
-    }, 3000);
+
+      await sendEmailVerification(user);
+
+      Toast.show({
+        type: 'success',
+        text1: 'Check your email to verify your account',
+      });
+
+      setLoading(false);
+      navigation.navigate("LOGINA");
+    } catch (error) {
+      setLoading(false);
+      Alert.alert("Error", error.message);
+      console.log('error', error.message);
+    }
   };
 
   const handleOpenLink = () => {
-    Linking.openURL("https://apps.knust.edu.gh/Staff/Account/LogOn?ReturnUrl=%2FStaffs"); // Replace with your desired URL
+    Linking.openURL("https://apps.knust.edu.gh/students");
   };
 
   return (
-    <ImageBackground
-      source={require("../assets/wallpapertemp.jpg")} // Replace with your actual background image source
-      style={styles.backgroundImage}
-      resizeMode="cover"
-    >
-      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-        <View style={styles.container}>
-          <TouchableOpacity style={styles.backButtonWrapper} onPress={handleGoBack}>
-            <Ionicons
-              name={"arrow-back-outline"}
-              color={colors.primary}
-              size={25}
-            />
-          </TouchableOpacity>
-          <View style={styles.textContainer}>
-            <Text style={styles.headingText}>Let's get</Text>
-            <Text style={styles.headingText}>started</Text>
-          </View>
-          <View style={styles.formContainer}>
+    <SafeAreaView style={styles.container}>
+     
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+          <View style={styles.innerContainer}>
+            <TouchableOpacity style={styles.backButtonWrapper} onPress={handleGoBack}>
+              <Ionicons
+                name={"arrow-back-outline"}
+                color={colors.primary}
+                size={25}
+              />
+            </TouchableOpacity>
+            <View style={styles.textContainer}>
+              <Text style={styles.headingText}>Let's get</Text>
+              <Text style={styles.headingText}>started Admin</Text>
+            </View>
+            <View style={styles.formContainer}>
               <View style={styles.inputContainer}>
-              <FontAwesome6 name={"user"} size={30} color={colors.primary} />
+                <SimpleLineIcons name="user" size={30} color={colors.primary} />
                 <TextInput
                   style={styles.textInput}
                   placeholder="Enter your First Name"
-                  onChangeText={(FirstName) => setFirstName(FirstName)}
+                  value={firstName}
+                  onChangeText={setFirstName}
                   placeholderTextColor={colors.secondary}
                   autoCorrect={false}
-                  keyboardType="email-address"
                 />
               </View>
 
               <View style={styles.inputContainer}>
-              <FontAwesome6 name={"user"} size={30} color={colors.primary} />
+                <SimpleLineIcons name="user" size={30} color={colors.primary} />
                 <TextInput
                   style={styles.textInput}
                   placeholder="Enter your Last Name"
-                  onChangeText={(LastName) => setLastName(LastName)}
+                  value={lastName}
+                  onChangeText={setLastName}
                   placeholderTextColor={colors.secondary}
-                  keyboardType="email-address"
                   autoCorrect={false}
                 />
               </View>
 
               <View style={styles.inputContainer}>
-                <SimpleLineIcons
-                  name={"screen-smartphone"}
-                  size={30}
-                  color={colors.primary}
-                />
+                <SimpleLineIcons name="envelope" size={30} color={colors.primary} />
                 <TextInput
                   style={styles.textInput}
                   placeholder="Enter your Email"
-                  onChangeText={(Email) => setEmail(Email)}
+                  value={email}
+                  onChangeText={setEmail}
                   placeholderTextColor={colors.secondary}
                   keyboardType="email-address"
                   autoCorrect={false}
+                  autoCapitalize="none"
                 />
               </View>
               <View style={styles.inputContainer}>
@@ -112,70 +140,70 @@ const SignupScreenAdmin = () => {
                 <TextInput
                   style={styles.textInput}
                   placeholder="Enter your password"
-                  onChangeText={(Password) => setPassword(Password)}
+                  value={password}
+                  onChangeText={setPassword}
                   autoCapitalize="none"
                   autoCorrect={false}
                   placeholderTextColor={colors.secondary}
                   secureTextEntry={secureEntry}
                 />
-                <TouchableOpacity
-                  onPress={() => {
-                    setSecureEntry((prev) => !prev);
-                  }}
-                >
-                  <SimpleLineIcons name={"eye"} size={20} color={colors.secondary} />
+                <TouchableOpacity onPress={() => setSecureEntry(!secureEntry)}>
+                  <SimpleLineIcons name={secureEntry ? "eye-off" : "eye"} size={20} color={colors.secondary} />
                 </TouchableOpacity>
               </View>
-            <TouchableOpacity
-              style={styles.loginButtonWrapper}
-              onPress={handleSignUp}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator size="small" color={colors.white} />
-              ) : (
-                <Text style={styles.loginText}>Sign up</Text>
-              )}
-            </TouchableOpacity>
-            <Text style={styles.continueText}>or continue with</Text>
-            <TouchableOpacity style={styles.googleButtonContainer} onPress={handleOpenLink}>
-              <Image
-                source={require("../assets/KNUST.jpeg")}
-                style={styles.googleImage}
-              />
-              <Text style={styles.googleText}>Staff Portal</Text>
-            </TouchableOpacity>
-            <View style={styles.footerContainer}>
-              <Text style={styles.accountText}>Already have an account!</Text>
-              <TouchableOpacity onPress={handleLogin}>
-                <Text style={styles.signupText}>Login</Text>
+
+              <TouchableOpacity
+                style={styles.loginButtonWrapper}
+                onPress={handleSignUp}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator size="small" color={colors.secondary} />
+                ) : (
+                  <Text style={styles.loginText}>Sign up</Text>
+                )}
               </TouchableOpacity>
+              <Text style={styles.continueText}>or continue with</Text>
+              <TouchableOpacity style={styles.googleButtonContainer} onPress={handleOpenLink}>
+                <Image
+                  source={require("../assets/KNUST.jpeg")}
+                  style={styles.googleImage}
+                />
+                <Text style={styles.googleText}>Student Portal</Text>
+              </TouchableOpacity>
+              <View style={styles.footerContainer}>
+                <Text style={styles.accountText}>Already have an account!</Text>
+                <TouchableOpacity onPress={handleLogin}>
+                  <Text style={styles.signupText}>Login</Text>
+                </TouchableOpacity>
+              </View>
             </View>
+            <Toast />
           </View>
-          <Toast />
-        </View>
-      </ScrollView>
-    </ImageBackground>
+        </ScrollView>
+  
+    </SafeAreaView>
   );
 };
 
 export default SignupScreenAdmin;
 
 const styles = StyleSheet.create({
-  backgroundImage: {
+  background: {
     flex: 1,
-    resizeMode: "cover",
-    justifyContent: "center",
-  },
-  scrollViewContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingVertical: 20,
+    resizeMode: 'cover',
+   
   },
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: 'white',
   },
+  innerContainer: {
+    flex: 1,
+    padding: 20, // Adjust padding as needed
+  },
+
   backButtonWrapper: {
     height: 40,
     width: 40,
@@ -189,7 +217,7 @@ const styles = StyleSheet.create({
   },
   headingText: {
     fontSize: 32,
-    color: colors.primary,
+    color: '#471710',
     fontFamily: fonts.SemiBold,
   },
   formContainer: {
@@ -197,7 +225,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     borderWidth: 1,
-    borderColor: colors.primary,
+    borderColor: colors.secondary,
     borderRadius: 100,
     paddingHorizontal: 20,
     flexDirection: "row",
@@ -211,8 +239,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     fontFamily: fonts.Light,
   },
+  forgotPasswordText: {
+    textAlign: "right",
+    color: colors.primary,
+    fontFamily: fonts.SemiBold,
+    marginVertical: 10,
+  },
   loginButtonWrapper: {
-    backgroundColor: '#FF6232',
+    backgroundColor: 'red',
     borderRadius: 100,
     marginTop: 20,
     justifyContent: "center",
@@ -264,6 +298,10 @@ const styles = StyleSheet.create({
   signupText: {
     color: colors.primary,
     fontFamily: fonts.Bold,
-    fontWeight: "bold",
+    fontWeight: 'bold',
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    justifyContent: 'space-between',
   },
 });

@@ -7,16 +7,18 @@ import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
 import { useNavigation } from "@react-navigation/native";
 import { AntDesign, FontAwesome, FontAwesome5, MaterialCommunityIcons, Octicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-
+import ProfileScreen from "./ProfileScreen"; // Import the new ProfileScreen
 import HomeScreen from "./HomeScreen";
 import StatusScreen from "./StatusScreen";
 import NewScreen from "./NewScreen";
-
+import { getAuth } from 'firebase/auth'; // Import Firebase Auth
+import { getFirestore, collection, doc, setDoc } from 'firebase/firestore'; // Import Firestore
+import { auth, db } from '../../../config'; // Ensure correct path
 
 
 const InputScreen = () => {
   const navigation = useNavigation();
-  const [secureEntry, setSecureEntry, label, placeholder, value, setValue, secureTextEntry] = useState(true);
+  const [secureEntry, setSecureEntry] = useState(true);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -38,10 +40,38 @@ const InputScreen = () => {
     setModalVisible(true);
   };
 
-  const handleConfirm = () => {
-    setModalVisible(false);
-    Alert.alert("Details received", "Letter will be sent to your mail on approval.");
-    clearForm();
+  const handleConfirm = async () => { 
+    try {
+      // Get current user ID
+      const user = auth.currentUser;
+      if (!user) {
+        Alert.alert("Error", "No user is logged in.");
+        return;
+      }
+
+      const userId = user.uid;
+
+      // Create a document in Firestore
+      const docRef = doc(collection(db, 'messages'), userId);
+      await setDoc(docRef, {
+        name,
+        email,
+        studentId,
+        course,
+        indexNo,
+        level,
+        companyName,
+        companyAddress,
+        createdAt: new Date()
+      });
+
+      setModalVisible(false);
+      Alert.alert("Details received", "Letter will be sent to your mail on approval.");
+      clearForm();
+    } catch (error) {
+      console.error('Error submitting details:', error);
+      Alert.alert("Error", "There was an error submitting your details. Please try again.");
+    }
   };
 
   const clearForm = () => {
@@ -54,7 +84,6 @@ const InputScreen = () => {
     setCompanyName("");
     setCompanyAddress("");
   };
-
   const handleProfilePress = () => {
     setProfileModalVisible(true);
   };
@@ -62,29 +91,25 @@ const InputScreen = () => {
   const handleCloseProfileModal = () => {
     setProfileModalVisible(false);
   };
-  const handleLogout = () => {
-    setProfileModalVisible(false); //
-    navigation.navigate('SIGNINNEW'); // Replace 'Login' with the name of your login screen
-  };
-  
 
+  const handleLogout = () => {
+    setProfileModalVisible(false);
+    navigation.navigate('SIGNINNEW');
+  };
   return (
-    <ImageBackground source={require('../assets/wallpapertemp.jpg')} style={styles.backgroundImage}>
+    <ImageBackground source={require('../assets/newbkkkkkkk2.jpg')} style={styles.backgroundImage}>
       <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <TouchableOpacity style={styles.backButtonWrapper} onPress={handleGoBack}>
-          <Ionicons name={"arrow-back-outline"} color={colors.primary} size={25} />
+          <Ionicons name={"arrow-back-outline"} color={'gray'} size={25} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.profileButton} onPress={handleProfilePress}>
-          <FontAwesome5 name={"user-circle"} size={40} color={colors.primary} />
-          <View style={[styles.onlineIndicator, { backgroundColor: 'green' }]} />
-        </TouchableOpacity>
+      
         <View style={styles.textContainer}>
           <Text style={styles.headingText}>Internship Details</Text>
         </View>
         <ScrollView style={styles.scrollView}>
           <View style={styles.formContainer}>
             <View style={styles.inputContainer}>
-              <FontAwesome5 name={"portrait"} size={30} color={colors.primary} style={styles.icon}  />
+              <FontAwesome5 name={"portrait"} size={30} color={'gray'} style={styles.icon}  />
               <TextInput
                 style={styles.textInput}
                 placeholder="Enter your Name"
@@ -95,7 +120,7 @@ const InputScreen = () => {
               />
             </View>
             <View style={styles.inputContainer}>
-              <Ionicons name={"mail-outline"} size={30} color={colors.primary}style={styles.icon}  />
+              <Ionicons name={"mail-outline"} size={30} color={'gray'}style={styles.icon}  />
               <TextInput
                 style={styles.textInput}
                 placeholder="Enter your email"
@@ -106,7 +131,7 @@ const InputScreen = () => {
               />
             </View>
             <View style={styles.inputContainer}>
-              <AntDesign name={"idcard"} size={30} color={colors.primary} style={styles.icon} />
+              <AntDesign name={"idcard"} size={30} color={'gray'} style={styles.icon} />
               <TextInput
                 style={styles.textInput}
                 placeholder="Student ID"
@@ -117,7 +142,7 @@ const InputScreen = () => {
               />
             </View>
             <View style={styles.inputContainer}>
-              <MaterialCommunityIcons name={"book-education-outline"} size={30} color={colors.primary}style={styles.icon}  />
+              <MaterialCommunityIcons name={"book-education-outline"} size={30} color={'gray'}style={styles.icon}  />
               <TextInput
                 style={styles.textInput}
                 placeholder="Enter your Course"
@@ -128,7 +153,7 @@ const InputScreen = () => {
               />
             </View>
             <View style={styles.inputContainer}>
-              <Octicons name={"number"} size={30} color={colors.primary} style={styles.icon} />
+              <Octicons name={"number"} size={30} color={'gray'} style={styles.icon} />
               <TextInput
                 style={styles.textInput}
                 placeholder="Enter your Index No"
@@ -139,7 +164,7 @@ const InputScreen = () => {
               />
             </View>
             <View style={styles.inputContainer}>
-              <SimpleLineIcons name={"screen-smartphone"} size={30} color={colors.primary} style={styles.icon} />
+              <SimpleLineIcons name={"screen-smartphone"} size={30} color={'gray'} style={styles.icon} />
               <TextInput
                 style={styles.textInput}
                 placeholder="Enter your Level"
@@ -151,7 +176,7 @@ const InputScreen = () => {
             </View>
            
             <View style={[styles.inputContainer, styles.multilineInput1]}>
-            <FontAwesome5 name={"warehouse"} size={30} color={colors.primary} style={styles.icon} />
+            <FontAwesome5 name={"warehouse"} size={20} color={'gray'} style={styles.icon} />
               <TextInput
                 style={styles.textInput}
                 placeholder="Company Name"
@@ -164,7 +189,7 @@ const InputScreen = () => {
               />
             </View>
             <View style={[styles.inputContainer, styles.multilineInput]}>
-              <FontAwesome name={"address-book-o"} size={30} color={colors.primary} style={styles.icon}  />
+              <FontAwesome name={"address-book-o"} size={20} color={'gray'} style={styles.icon}  />
         
               <TextInput
                 style={styles.textInput}
@@ -219,11 +244,11 @@ const InputScreen = () => {
        <View style={styles.profileModalView}>
       
        <TouchableOpacity style={styles.closeProfileModal} onPress={handleCloseProfileModal}>
-              <AntDesign name={"closecircle"} color={colors.primary} size={30} />
+              <AntDesign name={"closecircle"} color={'gray'} size={30} />
             </TouchableOpacity>
      
       <ScrollView contentContainerStyle={styles.profileContent}>
-        <FontAwesome5 name={"user-circle"} size={120} color={colors.primary} />
+        <FontAwesome5 name={"user-circle"} size={120} color={'gray'} />
        
         <View style={styles.profileRow}>
           <Text style={styles.profileLabel}>Surname:</Text>
@@ -266,8 +291,8 @@ const InputScreen = () => {
         </Modal>
        
       </KeyboardAvoidingView>
-      </ImageBackground>
-   
+    
+   </ImageBackground>
   );
 };
 
@@ -275,75 +300,71 @@ const Tab = createBottomTabNavigator();
 
 const InputScreenWithTabs = () => {
   return (
-    <ImageBackground source={require('../assets/wallpapertemp.jpg')} style={styles.backgroundImage}>
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarStyle: {
-          backgroundColor: 'black', // Black background for tabs
-          borderRadius: 25, // Rounded corners for the entire tab bar
-          paddingBottom: 2, // Adjust padding at the bottom
-          marginBottom: 20, // Move the tab bar up
-          marginHorizontal: 35, // Add padding to the left and right sides
-        },
-        tabBarActiveTintColor: '#fff', // Color of the active tab icon and label
-        tabBarInactiveTintColor: '#fff', // Color of inactive tab icons and labels
-        tabBarShowLabel: true, // Show labels
-        tabBarLabelStyle: {
-          fontSize: 12, // Adjust font size as needed
-          marginBottom: 10, // Adjust margin to align with icons
-        },
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-          let IconComponent;
-          
-          if (route.name === 'Home') {
-            iconName = 'home';
-            IconComponent = AntDesign;
-          } else if (route.name === 'New Request') {
-            iconName = 'wpforms';
-            IconComponent = FontAwesome;
-          } else if (route.name === 'Progress') {
-            iconName = 'clock-o';
-            IconComponent = FontAwesome;
-          }
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          tabBarStyle: {
+            backgroundColor: '#fff', // White background for the tabs
+            borderTopColor: 'transparent', // Remove the top border
+            //borderRadius: 25, // Rounded corners for the tab bar
+            paddingBottom: 5, // Adjust padding at the bottom
+            marginBottom: 0, // Move the tab bar up
+            height: 80, // Increase the height to fit the U-shape
+          },
+          tabBarActiveTintColor: '#000', // Color of the active tab icon and label
+          tabBarInactiveTintColor: 'gray', // Color of inactive tab icons and labels
+          tabBarShowLabel: false, // Hide labels
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName;
+            let IconComponent;
 
-          return (
-            <View style={[styles.tabIcon, focused && styles.activeTab]}>
-              <IconComponent name={iconName} size={35} color={color} style={styles.iconN} />
-            </View>
-          );
-        },
-      })}
-    >
-      <Tab.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{
-          headerShown: false,
-          tabBarLabel: 'Home', // Label for the tab
-        }}
-      />
-      <Tab.Screen
-        name="New Request"
-        component={InputScreen}
-        options={{
-          headerShown: false,
-          tabBarLabel: 'New Request', // Label for the tab
-        }}
-      />
-      <Tab.Screen
-        name="Progress"
-        component={NewScreen}
-        options={{
-          headerShown: false,
-          tabBarLabel: 'Status', // Label for the tab
-        }}
-      />
-    </Tab.Navigator>
+            if (route.name === 'Home') {
+              iconName = 'home';
+              IconComponent = AntDesign;
+            } else if (route.name === 'New Request') {
+              iconName = 'wpforms';
+              IconComponent = FontAwesome;
+            } else if (route.name === 'Progress') {
+              iconName = 'clock-o';
+              IconComponent = FontAwesome;
+            } else if (route.name === 'Profile') {
+              iconName = 'user';
+              IconComponent = FontAwesome5;
+            }
 
+            return (
+              <View style={[styles.tabIcon, focused && styles.activeTab]}>
+                <IconComponent name={iconName} size={35} color={color} style={styles.iconN} />
+                {route.name === 'New Request' || route.name === 'Progress' ? (
+                  <View style={styles.uShape} />
+                ) : null}
+              </View>
+            );
+          },
+        })}
+      >
+        <Tab.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{ headerShown: false }}
+        />
+        <Tab.Screen
+          name="New Request"
+          component={InputScreen}
+          options={{ headerShown: false }}
+        />
+        <Tab.Screen
+          name="Progress"
+          component={NewScreen}
+          options={{ headerShown: false }}
+        />
+        <Tab.Screen
+          name="Profile"
+          component={ProfileScreen}
+          options={{ headerShown: false }}
+        />
+      </Tab.Navigator>
     </KeyboardAvoidingView>
-    </ImageBackground>
   );
 };
 
@@ -354,8 +375,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     resizeMode: 'cover', // or 'stretch'
-
-  backgroundImage: `url('../assets/wallpapertemp.jpg')`,
+//backgroundColor: 'white',
   },
 
   onlineIndicator: {
@@ -366,12 +386,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
     marginTop: -8,
   },
-  backgroundImage1: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-   backgroundColor: 'rgba(255, 255, 255, 0.3)', // Optional: semi-transparent background for better visibility
-  },
+
 
  
   
@@ -398,7 +413,7 @@ const styles = StyleSheet.create({
   profileLabel: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: colors.primary,
+    color: 'gray',
   },
   profileValue: {
     fontSize: 16,
@@ -406,7 +421,7 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     marginTop: 20,
-    backgroundColor: colors.primary,
+    backgroundColor: 'gray',
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,
@@ -431,10 +446,10 @@ const styles = StyleSheet.create({
   },
 
   tabIcon: {
-    width: 106, // Adjust as needed
-    height: 70, // Adjust as needed
+    width: 50, // Adjust as needed
+    height: 50, // Adjust as needed
     //backgroundColor: 'black', // Background color for icon container
-    borderRadius: 22, // Half of the width and height to make it circular
+    borderRadius: 100, // Half of the width and height to make it circular
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 28,
@@ -442,8 +457,8 @@ const styles = StyleSheet.create({
   },
   activeTab: {
 
-    backgroundColor: '#FF6232', // Background color for the active tab
-    borderColor: '#FF6232', // Border color for the active tab
+    backgroundColor: '#00BFFF', // Background color for the active tab
+    borderColor: '#00BFFF', // Border color for the active tab
     borderWidth: 1, // Border width for the active tab
   },
   icon: {
@@ -455,14 +470,15 @@ const styles = StyleSheet.create({
   
   iconN: {
     fontSize: 30,
-    marginTop: -20,
+    marginTop: -5,
+    marginBottom: -5,
     //marginRight: 5,
    // marginLeft: 5,
    }, 
   backgroundImage: {
     flex: 1,
     resizeMode: 'cover', // or 'stretch'
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+ 
   
   },
   backButtonWrapper: {
@@ -499,14 +515,15 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flexDirection: "row",
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 15,
     borderWidth: 1,
-    borderColor: colors.secondary,
+    borderColor: '#D3D3D3',
     marginBottom: 18,
-    marginLeft: 25,
-    marginRight:25,
+    marginLeft: 30,
+    marginRight:30,
+    backgroundColor: '#fff', // Very light blue background
     
   },
   textInput: {
@@ -518,8 +535,8 @@ const styles = StyleSheet.create({
     //fontWeight:'bold',
   },
   proceedButtonWrapper: {
-    backgroundColor: '#FF6232',
-    borderRadius: 100,
+    backgroundColor: '#008ECC',
+    borderRadius: 10,
     marginTop: 5,
     width: "50%",
     alignItems: "center",
@@ -567,7 +584,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   confirmButtonWrapper: {
-    backgroundColor: colors.primary,
+    backgroundColor: 'gray',
     borderRadius: 10,
     padding: 10,
     elevation: 2,
@@ -605,7 +622,7 @@ const styles = StyleSheet.create({
  
   logoutButton: {
     marginTop: 70,
-    backgroundColor: '#FF6232',
+    backgroundColor: '#008ECC',
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 15,

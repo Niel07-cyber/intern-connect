@@ -1,27 +1,30 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, ImageBackground, Image } from "react-native";
+import { StyleSheet, Text, View, ImageBackground, Image, Dimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 const colors = {
   white: '#FFFFFF',
-  primary: '#0000FF', // Example primary color
-  secondary: '#808080', // Example secondary color
-  orange: '#FFA500', // Example orange color for the button
+  primary: '#0000FF',
+  secondary: '#808080',
+  orange: '#FFA500',
 };
 
 const fonts = {
-  SemiBold: 'Arial-BoldMT', // Example font family
-  Medium: 'ArialMT', // Example font family
+  SemiBold: 'Arial-BoldMT',
+  Medium: 'ArialMT',
 };
+
+const { height } = Dimensions.get('window');
 
 const HomeScreenAdmin = () => {
   const navigation = useNavigation();
-  const [titleWords, setTitleWords] = useState([]);
-  const [subTitleWords, setSubTitleWords] = useState([]);
+  const [subTitleWords, setSubTitleWords] = useState("");
 
   useEffect(() => {
-    animateText("Intern Connect", setTitleWords);
-    animateText("Welcome to InternConnect, Send letters to Students fast and simple. Connect with your Students now!", setSubTitleWords);
+    animateText(
+      "Welcome to InternConnect, Send letters to Students fast and simple. Connect with your Students now!",
+      setSubTitleWords
+    );
   }, []);
 
   const animateText = (text, setTextWords) => {
@@ -34,47 +37,69 @@ const HomeScreenAdmin = () => {
       } else {
         clearInterval(interval);
       }
-    }, 100); // Adjust the interval duration as needed
+    }, 100);
   };
 
   return (
-    <ImageBackground source={require("../assets/wallpapertemp.jpg")} style={styles.backgroundImage}>
-      <View style={styles.container}>
-        <Image source={require("../assets/logo.png")} style={styles.logo} />
-        <Text style={styles.title}>{titleWords}</Text>
-        <Text style={styles.subTitle}>{subTitleWords}</Text>
-      
+    <View style={styles.container}>
+      <View style={styles.topSection}>
+        <ImageBackground source={require("../assets/adminwallpae.webp")} style={styles.backgroundImage}>
+          {/* Additional components can be added here */}
+        </ImageBackground>
       </View>
-    </ImageBackground>
+      <View style={styles.overlay}>
+        <View style={styles.content}>
+          <Image source={require("../assets/icc.jpg")} style={styles.logo} />
+          <Image source={require("../assets/a.png")} style={styles.titleImage} />
+          <Text style={styles.subTitle}>{subTitleWords}</Text>
+        </View>
+      </View>
+    </View>
   );
 };
 
 export default HomeScreenAdmin;
 
 const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    resizeMode: 'cover',
-    justifyContent: 'center',
-  },
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+  },
+  topSection: {
+    height: height / 2.4,
+    width: '100%',
+  },
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'contain',
+  },
+  overlay: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: height / 2.2,
+    backgroundColor: 'white',
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
     paddingHorizontal: 20,
+    paddingTop: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   logo: {
-    width: 200, // Adjust dimensions as needed
-    height: 100, // Adjust dimensions as needed
+    width: 200,
+    height: 100,
     resizeMode: 'contain',
     marginBottom: 20,
   },
-  title: {
-    fontSize: 40,
-    fontFamily: fonts.SemiBold,
-    paddingHorizontal: 20,
-    textAlign: "center",
-    color: '#471710',
+  titleImage: {
+    width: 250,
+    height: 50,
+    resizeMode: 'contain',
     marginTop: 10,
   },
   subTitle: {
@@ -84,17 +109,5 @@ const styles = StyleSheet.create({
     color: '#471710',
     fontFamily: fonts.Medium,
     marginVertical: 20,
-  },
-  logosContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    marginTop: 20,
-    width: '100%',
-  },
-  logoImage: {
-    width: 50, // Adjust dimensions as needed
-    height: 50, // Adjust dimensions as needed
-    resizeMode: 'contain',
   },
 });

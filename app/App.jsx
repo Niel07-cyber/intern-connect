@@ -15,8 +15,10 @@ import NewScreen from './src/screen/NewScreen';
 import InputScreenAdmin from './src/screen/InputScreenAdmin'
 import GetStarted from './src/screen/GetStarted';
 import HomeScreenAdmin from './src/screen/HomeScreenAdmin';
-import { firebase } from '../config';
+import { auth } from '../config'; // Ensure this path is correct
 import { NavigationContainer } from '@react-navigation/native';
+import ProfileScreen from './src/screen/ProfileScreen';
+
 
 
 
@@ -24,24 +26,23 @@ const Stack = createNativeStackNavigator();
 
 
 const App = () => {
-  {
-    const [initalizing, setInitializing] =useState(true);
-    const [user, setUser] = useState();
+  const [initializing, setInitializing] = useState(true);
+  const [user, setUser] = useState();
 
-    //Handle user state changes
-    function onAuthStateChanged(user){
-      setUser(user);
-      if (initializing) setInitializing(false);
-    }
-    
-    useEffect(() => { 
-      const subscriber = firebase.auth().onAuthStateChanged(onAuthStateChanged);
-      return subscriber;
-    }, []);
+  // Handle user state changes
+  function onAuthStateChanged(user) {
+    setUser(user);
+    if (initializing) setInitializing(false);
+  }
 
-    if (initializing) return null;
+  useEffect(() => {
+    const subscriber = auth.onAuthStateChanged(onAuthStateChanged);
+    return subscriber; // Unsubscribe on unmount
+  }, []);
 
-    if(!user){
+  if (initializing) return null;
+
+  if (!user) {
 return (
       <Stack.Navigator screenOptions={{headerShown: false}}>
         <Stack.Screen name="SPLASH" component={SplashScreen} />
@@ -56,6 +57,7 @@ return (
         <Stack.Screen name="INPUTA" component={InputScreenAdmin} />
         <Stack.Screen name="STATUS" component={StatusScreen} />
         <Stack.Screen name="PROGRESS" component={NewScreen} />
+        <Stack.Screen name="PROFILE" component={ProfileScreen} />
       </Stack.Navigator>
 
   );
@@ -73,12 +75,13 @@ return(
         <Stack.Screen name="INPUTA" component={InputScreenAdmin} />
         <Stack.Screen name="STATUS" component={StatusScreen} />
         <Stack.Screen name="PROGRESS" component={NewScreen} />
+        <Stack.Screen name="PROFILE" component={ProfileScreen} />
          
         </Stack.Navigator>
      
 )
     }
-  }
+  
 
 
 

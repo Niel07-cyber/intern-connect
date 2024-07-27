@@ -5,38 +5,41 @@ const SplashScreen = ({ navigation }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       navigation.replace('GETSTARTED');
-    }, 2000); // 2000 ms = 2 seconds
+    }, 3000); // 2000 ms = 2 seconds
 
     return () => clearTimeout(timer);
   }, [navigation]);
 
   return (
-    <ImageBackground source={require('../assets/wallpapertemp.jpg')} style={styles.backgroundImage}>
+   
       <View style={styles.container}>
         <Image
-          source={require('../assets/intern.jpg')}
+          source={require('../assets/b.png')}
           style={styles.logo}
         />
       </View>
-    </ImageBackground>
+   
   );
 };
 
 const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    resizeMode: 'cover',
-    justifyContent: 'center',
-  },
+
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    backgroundColor: 'white',
   },
+  background: {
+    flex: 1,
+    resizeMode: 'cover',
+   
+  },
+  
   logo: {
-    width: 300,
-    height: 300,
+    width: 400,
+    height: 400,
     resizeMode: 'cover',
   },
 });

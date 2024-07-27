@@ -9,8 +9,9 @@ import {
   ActivityIndicator,
   ImageBackground,
   SafeAreaView,
-  ScrollView, // Import ScrollView
-  Linking
+  ScrollView,
+  Linking,
+  Alert
 } from "react-native";
 import { colors } from "../utils/colors";
 import { fonts } from "../utils/fonts";
@@ -18,49 +19,22 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
 import { useNavigation } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
-import { AntDesign } from "@expo/vector-icons";
-import { FontAwesome, FontAwesome6 } from "@expo/vector-icons";
-import { firebase } from "../../../config";
+import { auth, db } from '../../../config';
+import { collection, addDoc } from "firebase/firestore";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { CheckBox } from 'react-native-elements';
+
 
 const SignupScreen = () => {
   const navigation = useNavigation();
   const [secureEntry, setSecureEntry] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [Email, setEmail] = useState('')
-  const [Password, setPassword] = useState('')
-  const [FirstName, setFirstName] = useState('')
-  const [LastName, setLastName] = useState('')
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [isChecked, setIsChecked] = useState(false);
 
-  registerUser = async (email, password, firstName, lastName) => {
-  await firebase.auth().createUserWithEmailAndPassword(Email, Password)
-  .then(() => {
-      firebase.auth().currentUser.sendEmailVerification({
-          handleCodeInApp: true,
-          url:'https://internconnect-c39a4.firebaseapp.com',
-      })
-      .then(() => {
-        alert('Verification email sent')     
-       }).catch((error) => {
-        alert(error.message)
-       })
-       .then(() => {
-        firebase.firestore().collection('users')
-        .doc(firebase.auth().currentUser.uid)
-        .set({
-          FirstName,
-          LastName,
-          Email,
-        })
-       })
-       .catch((error) => {
-        alert(error.message)
-       })
-  })
-.catch((error => {
-  alert(error.message)
-}))
-
-  }
   const handleGoBack = () => {
     navigation.goBack();
   };
@@ -69,29 +43,51 @@ const SignupScreen = () => {
     navigation.navigate("LOGIN");
   };
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
+    if (!email || !password || !firstName || !lastName) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      await addDoc(collection(db, "users"), {
+        uid: user.uid,
+        email,
+        firstName,
+        lastName,
+        createdAt: new Date()
+      });
+
+      await sendEmailVerification(user);
+
       Toast.show({
         type: 'success',
         text1: 'Check your email to verify your account',
       });
-    }, 2000);
+
+      setLoading(false);
+      navigation.navigate("LOGIN");
+    } catch (error) {
+      setLoading(false);
+      Alert.alert("Error", error.message);
+      console.log('error',error.message)
+    }
   };
 
   const handleOpenLink = () => {
-    Linking.openURL("https://apps.knust.edu.gh/students"); // Replace with your desired URL
+    Linking.openURL("https://apps.knust.edu.gh/students");
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ImageBackground
-        source={require("../assets/wallpapermain.jpg")}
-        style={styles.backgroundImage}
-        resizeMode="cover"
-      >
+      
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
+          
           <View style={styles.innerContainer}>
             <TouchableOpacity style={styles.backButtonWrapper} onPress={handleGoBack}>
               <Ionicons
@@ -100,70 +96,88 @@ const SignupScreen = () => {
                 size={25}
               />
             </TouchableOpacity>
-            <View style={styles.textContainer}>
-              <Text style={styles.headingText}>Let's get</Text>
-              <Text style={styles.headingText}>started</Text>
-            </View>
+            <Image
+            source={require("../assets/signup-logo-1.webp")}
+            style={styles.logo1}
+          />
+            <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.googleButtonContainer} onPress={handleOpenLink}>
+                <Image
+                  source={require("../assets/KNUST.jpeg")}
+                  style={styles.googleImage}
+                />
+                <Text style={styles.googleText}>Student Portal</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.googleButtonContainer} onPress={handleOpenLink}>
+                <Image
+                  source={require("../assets/ggg.jpeg")}
+                  style={styles.googleImage1}
+                />
+                <Text style={styles.googleText}>Google</Text>
+              </TouchableOpacity>
+              </View>
             <View style={styles.formContainer}>
               <View style={styles.inputContainer}>
-              <SimpleLineIcons name="user" size={30} color={colors.primary} />
+                <SimpleLineIcons name="user" size={25} color={'gray'} />
                 <TextInput
                   style={styles.textInput}
                   placeholder="Enter your First Name"
-                  onChangeText={(FirstName) => setFirstName(FirstName)}
+                  value={firstName}
+                  onChangeText={setFirstName}
                   placeholderTextColor={colors.secondary}
                   autoCorrect={false}
-                  keyboardType="email-address"
                 />
               </View>
 
               <View style={styles.inputContainer}>
-              <SimpleLineIcons name="user" size={30} color={colors.primary} />
+                <SimpleLineIcons name="user" size={25} color={'gray'} />
                 <TextInput
                   style={styles.textInput}
                   placeholder="Enter your Last Name"
-                  onChangeText={(LastName) => setLastName(LastName)}
+                  value={lastName}
+                  onChangeText={setLastName}
                   placeholderTextColor={colors.secondary}
-                  keyboardType="email-address"
                   autoCorrect={false}
                 />
               </View>
 
               <View style={styles.inputContainer}>
-              <SimpleLineIcons name="envelope" size={30} color={colors.primary} />
+                <SimpleLineIcons name="envelope" size={25} color={'gray'} />
                 <TextInput
                   style={styles.textInput}
                   placeholder="Enter your Email"
-                  onChangeText={(Email) => setEmail(Email)}
+                  value={email}
+                  onChangeText={setEmail}
                   placeholderTextColor={colors.secondary}
                   keyboardType="email-address"
                   autoCorrect={false}
+                  autoCapitalize="none"
                 />
               </View>
               <View style={styles.inputContainer}>
-                <SimpleLineIcons name={"lock"} size={30} color={colors.primary} />
+                <SimpleLineIcons name={"lock"} size={25} color={'gray'} />
                 <TextInput
                   style={styles.textInput}
                   placeholder="Enter your password"
-                  onChangeText={(Password) => setPassword(Password)}
+                  value={password}
+                  onChangeText={setPassword}
                   autoCapitalize="none"
                   autoCorrect={false}
                   placeholderTextColor={colors.secondary}
                   secureTextEntry={secureEntry}
                 />
-                <TouchableOpacity
-                  onPress={() => {
-                    setSecureEntry((prev) => !prev);
-                  }}
-                >
-                  <SimpleLineIcons name={"eye"} size={20} color={colors.secondary} />
-                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setSecureEntry(!secureEntry)}>
+        <Ionicons
+          name={secureEntry ? "eye" : "eye-off"} // Toggle icon based on secureEntry state
+          size={20}
+          color={'gray'}
+        />
+      </TouchableOpacity>
               </View>
 
-          
               <TouchableOpacity
                 style={styles.loginButtonWrapper}
-                onPress={() =>registerUser(Email, Password, FirstName, LastName)}
+                onPress={handleSignUp}
                 disabled={loading}
               >
                 {loading ? (
@@ -172,14 +186,27 @@ const SignupScreen = () => {
                   <Text style={styles.loginText}>Sign up</Text>
                 )}
               </TouchableOpacity>
-              <Text style={styles.continueText}>or continue with</Text>
-              <TouchableOpacity style={styles.googleButtonContainer} onPress={handleOpenLink}>
-                <Image
-                  source={require("../assets/KNUST.jpeg")}
-                  style={styles.googleImage}
-                />
-                <Text style={styles.googleText}>Student Portal</Text>
-              </TouchableOpacity>
+              {/* <View style={styles.lineWrapper}>
+        <View style={styles.line} />
+        <Text style={styles.continueText}>or continue with</Text>
+        <View style={styles.line} />
+      </View> */}
+             <View style={styles.checkboxContainer}>
+  <CheckBox
+    checked={isChecked}
+    onPress={() => setIsChecked(!isChecked)}
+    checkedColor={colors.primary}
+    uncheckedColor={colors.gray}
+    containerStyle={styles.checkbox}
+  />
+  <Text style={styles.checkboxText}>
+    By tapping Sign up, you agree to our{' '}
+    <Text style={styles.linkText} onPress={() => Linking.openURL('https://your-terms-url.com')}>
+      Terms and Conditions
+    </Text>
+  </Text>
+</View>
+
               <View style={styles.footerContainer}>
                 <Text style={styles.accountText}>Already have an account!</Text>
                 <TouchableOpacity onPress={handleLogin}>
@@ -190,7 +217,7 @@ const SignupScreen = () => {
             <Toast />
           </View>
         </ScrollView>
-      </ImageBackground>
+   
     </SafeAreaView>
   );
 };
@@ -200,7 +227,21 @@ export default SignupScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white, // Set background color as needed
+    backgroundColor: 'white', // Set background color as needed
+    
+  },
+  logo1: {
+    width: 180,
+    height: 80,
+    alignSelf: 'center',
+    marginVertical: 10,
+    marginTop: -10,
+    marginBottom: 30,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between', // Space between the buttons
+    marginVertical: 20,
   },
   innerContainer: {
     flex: 1,
@@ -211,10 +252,31 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     justifyContent: "center",
   },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 15,
+  },
+  checkbox: {
+    padding: 0,
+    margin: 0,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+  },
+  checkboxText: {
+    flex: 1,
+    color: 'gray',
+    fontFamily: fonts.Regular,
+  },
+  linkText: {
+    color: '#006699',
+    textDecorationLine: 'underline',
+  },
+  
   backButtonWrapper: {
     height: 40,
     width: 40,
-    backgroundColor: colors.gray,
+    backgroundColor: '#E3F2FD',
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
@@ -232,14 +294,15 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     borderWidth: 1,
-    borderColor: colors.secondary,
+    borderColor: '#E3F2FD',
     borderRadius: 100,
     paddingHorizontal: 20,
     flexDirection: "row",
     alignItems: "center",
     padding: 2,
-    marginVertical: 10,
+    marginVertical: 15,
     height: 55,
+    backgroundColor: '#E3F2FD', // Very light blue background
   },
   textInput: {
     flex: 1,
@@ -248,12 +311,12 @@ const styles = StyleSheet.create({
   },
   forgotPasswordText: {
     textAlign: "right",
-    color: colors.primary,
+    color: 'gray',
     fontFamily: fonts.SemiBold,
     marginVertical: 10,
   },
   loginButtonWrapper: {
-    backgroundColor: '#FF6232',
+    backgroundColor: '#006699',
     borderRadius: 100,
     marginTop: 20,
     justifyContent: "center",
@@ -266,30 +329,48 @@ const styles = StyleSheet.create({
     fontFamily: fonts.SemiBold,
     textAlign: "center",
   },
+  lineWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'gray',
+  },
   continueText: {
-    textAlign: "center",
-    marginVertical: 20,
-    fontSize: 14,
-    fontFamily: fonts.Regular,
-    color: colors.primary,
+    fontSize: 16,
+    fontFamily: 'Arial', // Update fontFamily as needed
+    marginHorizontal: 10,
+    marginTop: 20,
   },
   googleButtonContainer: {
-    flexDirection: "row",
-    borderWidth: 2,
-    borderColor: colors.primary,
-    borderRadius: 100,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 7,
-    gap: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#006699',
+    borderRadius: 15,
+    padding: 10,
+    width: '48%', // Reduced width of the buttons
+    justifyContent: 'center',
   },
   googleImage: {
-    height: 20,
-    width: 20,
+    height: 32,
+    width: 25,
+    marginRight: 10, // Space between the icon and text
+    alignSelf: 'flex-start', // Align the icon to the left
+  },
+
+  googleImage1: {
+    height: 30,
+    width: 30,
+    marginRight: 10, // Space between the icon and text
+    alignSelf: 'flex-start', // Align the icon to the left
   },
   googleText: {
     fontSize: 20,
     fontFamily: fonts.SemiBold,
+    
   },
   footerContainer: {
     flexDirection: "row",
@@ -299,11 +380,11 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   accountText: {
-    color: colors.primary,
+    color: 'gray',
     fontFamily: fonts.Regular,
   },
   signupText: {
-    color: colors.primary,
+    color: '#006699',
     fontFamily: fonts.Bold,
     fontWeight: 'bold',
   },

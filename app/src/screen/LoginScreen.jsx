@@ -9,35 +9,26 @@ import {
   ImageBackground,
   ScrollView,
   Image,
+  Alert,
+  Linking,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
 import { useNavigation } from "@react-navigation/native";
-import { AntDesign } from "@expo/vector-icons";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { colors } from "../utils/colors";
 import { fonts } from "../utils/fonts";
-import { Linking } from "react-native";
-import { firebase } from "../../../config";
-import { MaterialIcons } from '@expo/vector-icons';
+
+
 
 
 const LoginScreen = () => {
   const navigation = useNavigation();
   const [secureEntry, setSecureEntry] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [Email, setEmail] = useState('') 
-  const [Password, setPassword] = useState('')
-
-  const loginUser = async (Email, Password) => {
-    setLoading(true); // Start loading
-    try {
-      await firebase.auth().signInWithEmailAndPassword(Email, Password);
-      setLoading(false); // Stop loading upon success
-      navigation.navigate('INPUT');
-    } catch (error) {
-      setLoading(false); // Stop loading upon error
-      alert(error.message);
-    }}
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [keepSignedIn, setKeepSignedIn] = useState(false);
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -47,24 +38,31 @@ const LoginScreen = () => {
     navigation.navigate("SIGNUP");
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      navigation.navigate('INPUT');
-    }, 2000); // 2 seconds delay
+    const auth = getAuth();
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        setLoading(false);
+        const user = userCredential.user;
+        // Navigate to the next screen
+        navigation.navigate('INPUT');
+      })
+      .catch((error) => {
+        setLoading(false);
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        Alert.alert("Login Error", errorMessage);
+      });
   };
 
   const handleOpenLink = () => {
-    Linking.openURL("https://apps.knust.edu.gh/students"); // Replace with your desired URL
+    Linking.openURL("https://apps.knust.edu.gh/students");
   };
 
   return (
     <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-      <ImageBackground
-        source={require("../assets/wallpapermain.jpg")} // Replace with your actual background image
-        style={styles.background}
-      >
+      <ImageBackground source={require('../assets/newbkkkkk.jpg')} style={styles.backgroundImage}>
         <View style={styles.container}>
           <TouchableOpacity style={styles.backButtonWrapper} onPress={handleGoBack}>
             <Ionicons
@@ -73,64 +71,81 @@ const LoginScreen = () => {
               size={25}
             />
           </TouchableOpacity>
-          <View style={styles.textContainer}>
-            <Text style={styles.headingText}>Hello,</Text>
-            <Text style={styles.headingText}>Welcome</Text>
-            <Text style={styles.headingText}>Othniel</Text>
-          </View>
-          {/* form  */}
+          <Image
+            source={require("../assets/loginphoto.jpg")}
+            style={styles.logo1}
+          />
+          <Image
+            source={require("../assets/userlogin.jpeg")}
+            style={styles.logo}
+          />
           <View style={styles.formContainer}>
             <View style={styles.inputContainer}>
-            <SimpleLineIcons name="envelope" size={30} color={colors.primary} />
+              <SimpleLineIcons name="envelope" size={25} color={'gray'} />
               <TextInput
                 style={styles.textInput}
                 placeholder="Email"
-                onChangeText={(Email) => setEmail(Email)}
+                value={email}
+                onChangeText={setEmail}
                 autoCapitalize="none"
                 autoCorrect={false}
                 placeholderTextColor={colors.secondary}
                 keyboardType="email-address"
               />
             </View>
-          
             <View style={styles.inputContainer}>
-              <SimpleLineIcons name={"lock"} size={30} color={colors.primary} />
+              <SimpleLineIcons name={"lock"} size={25} color={'gray'} />
               <TextInput
                 style={styles.textInput}
                 placeholder="Password"
-                onChangeText={(Password) => setPassword(Password)}
+                value={password}
+                onChangeText={setPassword}
                 autoCapitalize="none"
                 autoCorrect={false}
                 placeholderTextColor={colors.secondary}
                 secureTextEntry={secureEntry}
               />
-              <TouchableOpacity
-                onPress={() => {
-                  setSecureEntry((prev) => !prev);
-                }}
-              >
-                <SimpleLineIcons name={"eye"} size={20} color={colors.primary} />
-              </TouchableOpacity>
+            <TouchableOpacity onPress={() => setSecureEntry(!secureEntry)}>
+        <Ionicons
+          name={secureEntry ? "eye" : "eye-off"} // Toggle icon based on secureEntry state
+          size={20}
+          color={'gray'}
+        />
+      </TouchableOpacity>
+    
+
             </View>
-            
-          
-            
-            <TouchableOpacity>
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-            </TouchableOpacity>
+            <View style={styles.optionsContainer}>
+  <View style={styles.keepSignedInContainer}>
+    <TouchableOpacity
+      style={styles.radioButton}
+      onPress={() => setKeepSignedIn(!keepSignedIn)}
+    >
+      {keepSignedIn && <View style={styles.radioButtonSelected} />}
+    </TouchableOpacity>
+    <Text style={styles.keepSignedInText}>Keep me signed in</Text>
+  </View>
+  <TouchableOpacity>
+    <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+  </TouchableOpacity>
+</View>
+
             <TouchableOpacity 
               style={styles.loginButtonWrapper}
-              onPress={() => loginUser(Email, Password)}
+              onPress={handleLogin}
               disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator size="small" color={colors.primary} />
+                <ActivityIndicator size="small" color={colors.white} />
               ) : (
                 <Text style={styles.loginText}>Login</Text>
               )}
             </TouchableOpacity>
-            
-            <Text style={styles.continueText}>or continue with</Text>
+            <View style={styles.continueContainer}>
+              <View style={styles.line} />
+              <Text style={styles.continueText}>or continue with</Text>
+              <View style={styles.line} />
+            </View>
             <TouchableOpacity style={styles.googleButtonContainer} onPress={handleOpenLink}>
               <Image
                 source={require("../assets/KNUST.jpeg")}
@@ -138,7 +153,6 @@ const LoginScreen = () => {
               />
               <Text style={styles.googleText}>Student Portal</Text>
             </TouchableOpacity>
-            
             <View style={styles.footerContainer}>
               <Text style={styles.accountText}>Don’t have an account?</Text>
               <TouchableOpacity onPress={handleSignup}>
@@ -147,7 +161,7 @@ const LoginScreen = () => {
             </View>
           </View>
         </View>
-      </ImageBackground>
+        </ImageBackground>
     </ScrollView>
   );
 };
@@ -161,33 +175,54 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     resizeMode: 'cover',
+   
   },
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: 'white',
   },
   backButtonWrapper: {
     height: 40,
     width: 40,
-    backgroundColor: colors.gray,
+    backgroundColor: "#E3F2FD",
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
   },
   textContainer: {
-    marginVertical: 20,
+    marginVertical: 10,
+    alignItems: 'flex-start', // Align text to the left
   },
   headingText: {
-    fontSize: 32,
+    fontSize: 24, // Reduced font size
     color: '#471710',
-    fontFamily: 'Roboto',
+    fontFamily: fonts.Bold, // Made the text bold
+    fontWeight: 'bold',
+    textAlign: 'left',
+  },
+  logo: {
+    width: 200,
+    height: 210,
+    alignSelf: 'center',
+    marginVertical: 10,
+    marginTop: -10,
+  },
+
+  logo1: {
+    width: 150,
+    height: 60,
+    alignSelf: 'center',
+    marginVertical: 10,
+    marginTop: -10,
+    marginBottom: 30,
   },
   formContainer: {
     marginTop: 20,
   },
   inputContainer: {
-    borderWidth: 1,
-    borderColor: colors.primary,
+    borderWidth: 1.5,
+    borderColor: '#E3F2FD',
     borderRadius: 100,
     paddingHorizontal: 20,
     flexDirection: "row",
@@ -195,20 +230,52 @@ const styles = StyleSheet.create({
     padding: 2,
     marginVertical: 10,
     height: 55,
+    backgroundColor: '#E3F2FD', // Very light blue background
   },
   textInput: {
     flex: 1,
     paddingHorizontal: 10,
     fontFamily: fonts.Light,
   },
-  forgotPasswordText: {
-    textAlign: "right",
-    color: '#471710',
-    fontFamily: fonts.SemiBold,
+  optionsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginVertical: 10,
   },
+  keepSignedInContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  radioButton: {
+    height: 20,
+    width: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: 'gray',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 5,
+  },
+  radioButtonSelected: {
+    height: 10,
+    width: 10,
+    borderRadius: 5,
+    backgroundColor: '#006699', // Use the color you want for selected state
+  },
+  keepSignedInText: {
+    color: 'black',
+    fontFamily: fonts.Regular,
+  },
+  forgotPasswordText: {
+    textAlign: "right",
+    color: '#006699',
+    fontFamily: fonts.SemiBold,
+    fontWeight: 'bold',
+  },
+  
   loginButtonWrapper: {
-    backgroundColor: '#FF6232',
+    backgroundColor: '#006699',
     borderRadius: 100,
     marginTop: 20,
     justifyContent: "center",
@@ -216,22 +283,31 @@ const styles = StyleSheet.create({
     height: 55,
   },
   loginText: {
-    color: '#471710',
+    color: 'white',
     fontSize: 20,
     fontFamily: fonts.SemiBold,
     textAlign: "center",
   },
-  continueText: {
-    textAlign: "center",
+  continueContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginVertical: 20,
+  },
+  continueText: {
     fontSize: 14,
     fontFamily: fonts.Regular,
-    color: '#471710',
+    color: 'gray',
+    marginHorizontal: 10,
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'gray',
   },
   googleButtonContainer: {
     flexDirection: "row",
-    borderWidth: 2,
-    borderColor: colors.primary,
+    borderWidth: 1,
+    borderColor: '#006699',
     borderRadius: 100,
     justifyContent: "center",
     alignItems: "center",
@@ -254,11 +330,12 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   accountText: {
-    color: '#471710',
+    color: 'gray',
     fontFamily: fonts.Regular,
+    fontWeight: 'bold',
   },
   signupText: {
-    color: '#471710',
+    color: '#006699',
     fontFamily: fonts.Bold,
     fontWeight: 'bold',
   },

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, ImageBackground, Image } from "react-native";
+import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { FontAwesome } from "@expo/vector-icons";
 
 const colors = {
   white: '#FFFFFF',
   primary: '#0000FF', // Example primary color
   secondary: '#808080', // Example secondary color
   orange: '#FFA500', // Example orange color for the button
+  lightBlue: '#ADD8E6', // Light blue color for the notification border
 };
 
 const fonts = {
@@ -38,18 +40,34 @@ const HomeScreen = () => {
   };
 
   return (
-    <ImageBackground source={require("../assets/wallpapertemp.jpg")} style={styles.backgroundImage}>
+    <ImageBackground
+      source={require("../assets/newbkkkkkkk2.jpg")} // Replace with your background image
+      style={styles.backgroundImage}
+    >
+      <View style={styles.overlay} />
+
       <View style={styles.container}>
-        <Image source={require("../assets/logo.png")} style={styles.logo} />
+        <View style={styles.header}>
+          <View style={styles.profileContainer}>
+            <Image
+              source={require("../assets/otpic.jpeg")} // Replace with your profile image
+              style={styles.profileImage}
+            />
+            <View style={styles.welcomeTextContainer}>
+              <Text style={styles.welcomeText}>Welcome Back 👋</Text>
+              <Text style={styles.nameText}>Othniel Aryee</Text>
+            </View>
+          </View>
+          <View style={styles.notificationWrapper}>
+            <TouchableOpacity style={styles.notificationButton}>
+              <FontAwesome name="bell" size={24} color={colors.white} />
+            </TouchableOpacity>
+          </View>
+        </View>
+        
+        <Image source={require("../assets/icc.jpg")} style={styles.logo} />
         <Text style={styles.title}>{titleWords}</Text>
         <Text style={styles.subTitle}>{subTitleWords}</Text>
-        <View style={styles.logosContainer}>
-          <Image source={require("../assets/logo.png")} style={styles.logoImage} />
-          <Image source={require("../assets/logo.png")} style={styles.logoImage} />
-          <Image source={require("../assets/logo.png")} style={styles.logoImage} />
-          <Image source={require("../assets/logo.png")} style={styles.logoImage} />
-          <Image source={require("../assets/logo.png")} style={styles.logoImage} />
-        </View>
       </View>
     </ImageBackground>
   );
@@ -60,8 +78,12 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
-    resizeMode: 'cover',
-    justifyContent: 'center',
+    width: '100%',
+    height: '100%',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject, // Covers the entire screen
+    backgroundColor: 'rgba(0, 0, 0, 0)', // Adjust opacity here
   },
   container: {
     flex: 1,
@@ -69,11 +91,58 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 20,
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+  },
+  profileContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  profileImage: {
+    width: 50, // Adjust dimensions as needed
+    height: 50, // Adjust dimensions as needed
+    borderRadius: 25,
+    marginRight: 10,
+  },
+  welcomeTextContainer: {
+    alignItems: 'flex-start',
+  },
+  welcomeText: {
+    fontSize: 18, // Adjust font size
+    fontFamily: fonts.Medium,
+    color: 'black',
+  },
+  nameText: {
+    fontSize: 25, // Adjust font size
+    fontFamily: fonts.SemiBold,
+    color: 'black',
+  },
+  notificationWrapper: {
+    position: 'absolute',
+    right: -25,
+    top: 17,
+  },
+  notificationButton: {
+    padding: 10,
+    borderRadius: 100, // For round border
+    borderWidth: 2,
+    borderColor: colors.lightBlue,
+    backgroundColor: colors.lightBlue,
+  },
   logo: {
     width: 200, // Adjust dimensions as needed
     height: 100, // Adjust dimensions as needed
     resizeMode: 'contain',
     marginBottom: 20,
+  
   },
   title: {
     fontSize: 40,

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Image, useWindowDimensions, ImageBackground } from 'react-native';
-import Logo from '../assets/logo.png';
+import { StyleSheet, Text, View, Image, ImageBackground, useWindowDimensions } from 'react-native';
+import Logo from '../assets/icc.jpg';
 import CustomButton from '../CustomButton/CustomButton';
-import { FontAwesome5 } from "@expo/vector-icons";
 
 const SignInScreen = ({ navigation }) => {
   const { height } = useWindowDimensions();
@@ -22,13 +21,14 @@ const SignInScreen = ({ navigation }) => {
     setTimeout(() => {
       setAdminPressed(false);
       navigation.navigate('LOGINA', { presentation: 'modal' });
-    }, 300); // Delay navigation for 500ms (adjust as needed)
+    }, 300); // Delay navigation for 300ms (adjust as needed)
   };
 
   return (
     <ImageBackground
-      source={require("../assets/wallpapermain.jpg")}
+      source={require('../assets/newbkkkkk.jpg')} // Replace with your background image
       style={styles.background}
+      resizeMode="cover"
     >
       <View style={styles.root}>
         <Image
@@ -36,11 +36,14 @@ const SignInScreen = ({ navigation }) => {
           style={styles.logo}
           resizeMode="contain"
         />
-
+        <Text style={styles.logoText}>Intern Connect</Text>
         <View style={styles.profileContainer}>
           <View style={[styles.profile, userPressed && styles.profilePressed]}>
-            <View style={[styles.profileIcon, userPressed && styles.profileIconPressed]}>
-              <FontAwesome5 name={"users"} size={80} color="#471710" />
+            <View style={styles.imageContainer}>
+              <Image
+                source={require("../assets/uuuuu.png")} // Replace with the path to your user profile image
+                style={[styles.profileIcon, userPressed && styles.profileIconPressed]}
+              />
             </View>
             <CustomButton
               text="User"
@@ -50,8 +53,11 @@ const SignInScreen = ({ navigation }) => {
             />
           </View>
           <View style={[styles.profile, adminPressed && styles.profilePressed]}>
-            <View style={[styles.profileIcon, adminPressed && styles.profileIconPressed]}>
-              <FontAwesome5 name={"user-shield"} size={70} color="#471710" />
+            <View style={styles.imageContainer}>
+              <Image
+                source={require("../assets/user.jpg")} // Replace with the path to your admin profile image
+                style={[styles.profileIcon, adminPressed && styles.profileIconPressed]}
+              />
             </View>
             <CustomButton
               text="Admin"
@@ -69,49 +75,61 @@ const SignInScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    resizeMode: 'cover',
-    justifyContent: 'center',
+    width: '100%',
+    height: '100%',
   },
   root: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center', // Center content vertically and horizontally
+    justifyContent: 'center',
     padding: 20,
   },
   logo: {
-    width: '50%',
-    maxWidth: 100,
-    maxHeight: 50,
-    marginTop: 10,
+    width: '100%',
+    maxWidth: 200,
+    maxHeight: 100,
+    marginTop: -480,
+  },
+  logoText: {
+    fontSize: 24,
+    color: '#000', // Adjust color as needed
+    marginBottom: 20,
   },
   profileContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    alignItems: 'center', // Align profiles vertically
+    alignItems: 'center',
     width: '100%',
-    marginTop: 20,
+    marginBottom: -310,
   },
   profile: {
-    alignItems: 'center', // Center items horizontally
+    alignItems: 'center',
   },
   profilePressed: {
     opacity: 0.7,
   },
-  profileIcon: {
-    width: 140,
-    height: 140,
-    borderRadius: 100, // Make it circular
+  imageContainer: {
+    width: 160,
+    height: 160,
+    borderRadius: 80, // Make it circular
     borderWidth: 6,
-    borderColor: '#471710',
+    borderColor: '#87CEEB',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20, // Space between profile icon and button
+    marginBottom: 20,
+    backgroundColor: 'transparent', // Set background color to transparent
+    overflow: 'hidden', // Ensure image does not overflow
+  },
+  profileIcon: {
+    width: '100%',
+    height: '100%',
   },
   profileIconPressed: {
     opacity: 0.7,
   },
   button: {
-    marginTop: 10, // Space between button and profile icon
+    marginTop: 10,
+    color: 'white',
   },
 });
 

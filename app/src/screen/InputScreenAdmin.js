@@ -1,20 +1,31 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView, Modal, Alert, KeyboardAvoidingView, Platform, ImageBackground } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  ScrollView,
+  Modal,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ImageBackground,
+} from "react-native";
 import { colors } from "../utils/colors";
 import { fonts } from "../utils/fonts";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
+import { FontAwesome, FontAwesome5, AntDesign, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { AntDesign, FontAwesome, FontAwesome5, MaterialCommunityIcons, Octicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
 
 import HomeScreenAdmin from "./HomeScreenAdmin";
 import StatusScreen from "./StatusScreen";
-import NewScreen from "./NewScreen";
 
 const InputScreen = () => {
   const navigation = useNavigation();
-  const [secureEntry, setSecureEntry, label, placeholder, value, setValue, secureTextEntry] = useState(true);
+  const [secureEntry, setSecureEntry] = useState(true);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -27,18 +38,39 @@ const InputScreen = () => {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [profileModalVisible, setProfileModalVisible] = useState(false);
+  const [generatedLetter, setGeneratedLetter] = useState("");
 
   const handleGoBack = () => {
     navigation.goBack();
   };
 
   const handleProceed = () => {
-    //setModalVisible(true);
+    // Simulate letter generation logic
+    const letter = `
+      [Kwame Nkrumah University Of Science and Technology]
+      
+      Date: ${new Date().toLocaleDateString()}
+      
+      To whom it may concern,
+      
+      This is to certify that ${name}, a student of ${course} with Student ID ${studentId} and Index No ${indexNo}, 
+      is currently in ${level} level at our institution.
+      
+      A requested for an internship letter to be issued for ${companyName}, 
+      located at ${companyAddress}.
+      
+      Sincerely,
+      Hayfron Acquah
+      HOD
+    `;
+    
+    setGeneratedLetter(letter);
+    setModalVisible(true);
   };
 
   const handleConfirm = () => {
     setModalVisible(false);
-    Alert.alert("Details received", "Letter will be sent to your mail on approval.");
+    Alert.alert("Success!", "Letter Sent to mail.");
     clearForm();
   };
 
@@ -60,107 +92,94 @@ const InputScreen = () => {
   const handleCloseProfileModal = () => {
     setProfileModalVisible(false);
   };
+
   const handleLogout = () => {
-    setProfileModalVisible(false); //
+    setProfileModalVisible(false);
     navigation.navigate('LOGINA');
   };
 
-  
-
   return (
-    <ImageBackground source={require('../assets/wallpapertemp.jpg')} style={styles.backgroundImage}>
+<ImageBackground source={require('../assets/newbkkkkk3.jpg')} style={styles.backgroundImage}>
+
       <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <TouchableOpacity style={styles.backButtonWrapper} onPress={handleGoBack}>
           <Ionicons name={"arrow-back-outline"} color={colors.primary} size={25} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.profileButton} onPress={handleProfilePress}>
-          <FontAwesome5 name={"user-circle"} size={40} color={colors.primary} />
-          <View style={[styles.onlineIndicator, { backgroundColor: 'green' }]} />
-        </TouchableOpacity>
+      
         <View style={styles.textContainer}>
           <Text style={styles.headingText}>Intern Letter</Text>
         </View>
         <ScrollView style={styles.scrollView}>
           <View style={styles.formContainer}>
-            <View style={[styles.inputContainer, styles.multilineInput]}>
-              <FontAwesome name={"address-book-o"} size={30} color={colors.primary} style={styles.icon}  />
-        
-              <TextInput
-                style={styles.textInput}
-                placeholder="Company Address"
-                placeholderTextColor={colors.secondary}
-                keyboardType="default"
-                value={companyAddress}
-                onChangeText={setCompanyAddress}
-                multiline={true}
-              />
-            </View>
-            <TouchableOpacity style={styles.proceedButtonWrapper} >
-              <Text style={styles.proceedText}>Proceed</Text>
-            </TouchableOpacity>
-          </View>
+            
+          <View style={styles.buttonContainer}>
+  <TouchableOpacity style={styles.largeButton1} onPress={handleProceed}>
+    <View style={styles.buttonContent}>
+      <View style={styles.iconContainer}>
+      <FontAwesome5 name="file-signature" size={25} color="#33CC33" />
 
-       
+      </View>
+    </View>
+    <Text style={styles.buttonText}>Generate</Text>
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.largeButton2} onPress={handleProceed}>
+    <View style={styles.buttonContent}>
+      <View style={styles.iconContainer2}>
+      <FontAwesome5 name="pen" size={25} color="#FF6666" />
+
+      </View>
+    </View>
+    <Text style={styles.buttonText}>Edit</Text>
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.largeButton3} onPress={handleProceed}>
+    <View style={styles.buttonContent}>
+      <View style={styles.iconContainer3}>
+      <FontAwesome5 name="file-pdf" size={30} color="#1E90FF" />
+
+
+
+      </View>
+    </View>
+    <Text style={styles.buttonText}>Review</Text>
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.largeButton4} onPress={handleProceed}>
+    <View style={styles.buttonContent}>
+      <View style={styles.iconContainer4}>
+        <FontAwesome name="file-text" size={30} color="#B57EDC" />
+      </View>
+    </View>
+    <Text style={styles.buttonText}>Preview</Text>
+  </TouchableOpacity>
+</View>
+
+
+          </View>
         </ScrollView>
-       
+
         <Modal
           animationType="slide"
           transparent={true}
-          visible={profileModalVisible}
+          visible={modalVisible}
           onRequestClose={() => {
-            setProfileModalVisible(false);
+            setModalVisible(false);
           }}
         >
-       <View style={styles.profileModalView}>
-      
-       <TouchableOpacity style={styles.closeProfileModal} onPress={handleCloseProfileModal}>
-              <AntDesign name={"closecircle"} color={colors.primary} size={30} />
-            </TouchableOpacity>
-     
-      <ScrollView contentContainerStyle={styles.profileContent}>
-        <FontAwesome5 name={"user-circle"} size={120} color={colors.primary} />
-        <Text style={styles.adminText}>Admin</Text>
-       
-        <View style={styles.profileRow}>
-          <Text style={styles.profileLabel}>Surname:</Text>
-          <Text style={styles.profileValue}> Aquah</Text>
-        </View>
-        <View style={styles.profileRow}>
-          <Text style={styles.profileLabel}>Other names:</Text>
-          <Text style={styles.profileValue}>Hayfron Kofi J.</Text>
-        </View>
-      
-        <View style={styles.profileRow}>
-          <Text style={styles.profileLabel}>Region:</Text>
-          <Text style={styles.profileValue}>Ashanti</Text>
-        </View>
-        <View style={styles.profileRow}>
-          <Text style={styles.profileLabel}>Status:</Text>
-          <Text style={styles.profileValue}>H.O.D</Text>
-        </View>
-        <View style={styles.profileRow}>
-          <Text style={styles.profileLabel}>Staff ID:</Text>
-          <Text style={styles.profileValue}>5645648</Text>
-        </View>
-        <View style={styles.profileRow}>
-          <Text style={styles.profileLabel}>Email:</Text>
-          <Text style={styles.profileValue}>ahayfronquah@sf.knust.edu.gh</Text>
-        </View>
-        <View style={styles.profileRow}>
-          <Text style={styles.profileLabel}>Phone Number:</Text>
-          <Text style={styles.profileValue}>+233 505568677</Text>
-        </View>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity>
-      </ScrollView>
-   
-    </View>
+          <View style={styles.modalView}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Generated Letter</Text>
+              <ScrollView style={styles.letterScrollView}>
+                <Text style={styles.generatedLetterText}>{generatedLetter}</Text>
+              </ScrollView>
+              <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
+                <Text style={styles.confirmButtonText}>Confirm</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </Modal>
-       
+
+      
       </KeyboardAvoidingView>
-      </ImageBackground>
-   
+ </ImageBackground>
   );
 };
 
@@ -168,24 +187,19 @@ const Tab = createBottomTabNavigator();
 
 const InputScreenWithTabs = () => {
   return (
-    <ImageBackground source={require('../assets/wallpapertemp.jpg')} style={styles.backgroundImage}>
-
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarStyle: {
-          backgroundColor: 'black', // Black background for tabs
-          borderRadius: 25, // Rounded corners for the entire tab bar
-          paddingBottom: 2, // Adjust padding at the bottom
-          marginBottom: 20, // Move the tab bar up
-          marginHorizontal: 35, // Add padding to the left and right sides
+          backgroundColor: '#fff', // White background for the tabs
+          borderTopColor: 'transparent', // Remove the top border
+          //borderRadius: 25, // Rounded corners for the tab bar
+          paddingBottom: 5, // Adjust padding at the bottom
+          marginBottom: 0, // Move the tab bar up
+          height: 80, // Increase the height to fit the U-shape
         },
-        tabBarActiveTintColor: '#fff', // Color of the active tab icon and label
-        tabBarInactiveTintColor: '#fff', // Color of inactive tab icons and labels
-        tabBarShowLabel: true, // Show labels
-        tabBarLabelStyle: {
-          fontSize: 12, // Adjust font size as needed
-          marginBottom: 10, // Adjust margin to align with icons
-        },
+        tabBarActiveTintColor: '#000', // Color of the active tab icon and label
+        tabBarInactiveTintColor: 'gray', // Color of inactive tab icons and labels
+        tabBarShowLabel: false, // Hide labels
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
           let IconComponent;
@@ -215,7 +229,7 @@ const InputScreenWithTabs = () => {
         component={HomeScreenAdmin}
         options={{
           headerShown: false,
-          tabBarLabel: 'Home', // Label for the tab
+          tabBarLabel: '', // Label for the tab
         }}
       />
       <Tab.Screen
@@ -223,7 +237,7 @@ const InputScreenWithTabs = () => {
         component={InputScreen}
         options={{
           headerShown: false,
-          tabBarLabel: 'Generate Letter', // Label for the tab
+          tabBarLabel: '', // Label for the tab
         }}
       />
       <Tab.Screen
@@ -231,25 +245,69 @@ const InputScreenWithTabs = () => {
         component={StatusScreen}
         options={{
           headerShown: false,
-          tabBarLabel: 'Intern Data', // Label for the tab
+          tabBarLabel: '', // Label for the tab
         }}
       />
     </Tab.Navigator>
 
   
-    </ImageBackground>
+
   );
 };
 
  
-export default InputScreenWithTabs;
+export default InputScreenWithTabs; 
+
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  
+  },
+  backgroundImage: {
+    flex: 1,
     resizeMode: 'cover', // or 'stretch'
-
-  backgroundImage: `url('../assets/wallpapertemp.jpg')`,
+  },
+  largeButton1: {
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 5, // Reduced padding
+    width: 80, // Fixed width
+    height: 80, // Fixed height
+    backgroundColor: '#CCFFCC',
+    borderColor: '#CCFFCC',
+    alignItems: 'center', // Center content horizontally
+  },
+  largeButton2: {
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 5, // Reduced padding
+    width: 80, // Fixed width
+    height: 80, // Fixed height
+    backgroundColor: '#FFCCCC',
+    borderColor: '#FFCCCC',
+    alignItems: 'center', // Center content horizontally
+    justifyContent: 'center', // Center content vertically
+  },
+  largeButton3: {
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 5, // Reduced padding
+    width: 80, // Fixed width
+    height: 80, // Fixed height
+    backgroundColor: '#E6F7FF',
+    borderColor: '#E6F7FF',
+    alignItems: 'center', // Center content horizontally
+  },
+  largeButton4: {
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 5, // Reduced padding
+    width: 80, // Fixed width
+    height: 80, // Fixed height
+    backgroundColor: '#F3E5FF',
+    borderColor: '#F3E5FF',
+    alignItems: 'center', // Center content horizontally
   },
   adminText: {
     fontSize: 18,
@@ -260,6 +318,51 @@ const styles = StyleSheet.create({
     borderRadius: 5, // Rounded corners
     textAlign: 'center', // Centered text
   },
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'cover', // or 'stretch'
+ 
+  
+  },
+  iconContainer: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#CCFFCC',
+    borderRadius: 100, // Circle shape for the icon container
+    backgroundColor: '#CCFFCC',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  iconContainer2: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#FFCCCC',
+    borderRadius: 100, // Circle shape for the icon container
+    backgroundColor: '#FFCCCC',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  iconContainer3: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#E6F7FF',
+    borderRadius: 100, // Circle shape for the icon container
+    backgroundColor: '#E6F7FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconContainer4: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#F3E5FF',
+    borderRadius: 100, // Circle shape for the icon container
+    backgroundColor: '#F3E5FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
 
   onlineIndicator: {
     width: 10,
@@ -269,14 +372,42 @@ const styles = StyleSheet.create({
     marginRight: 10,
     marginTop: -8,
   },
-  backgroundImage1: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-   backgroundColor: 'rgba(255, 255, 255, 0.3)', // Optional: semi-transparent background for better visibility
-  },
 
- 
+buttonContainer: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 13,
+    marginTop: 20,
+  },
+  smallButton: {
+    backgroundColor: 'cyan', // Button background color
+    height: 60, // Height of the button
+    width: 60, // Width of the button
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10, // Square corners
+  },
+  buttonText: {
+    fontSize: 12, // Smaller font size
+    textAlign: 'center',
+    marginTop: -5,
+    color: '#000', // Text color
+  },
+  buttonContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  icon1: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: 'white',
+    borderRadius:200,
+    backgroundColor: 'white',
+    
+    
+    
+  },
   
   closeProfileModal: {
     position: 'absolute',
@@ -333,11 +464,12 @@ const styles = StyleSheet.create({
     textAlignVertical: "top", // Ensure text starts from the top
   },
 
+ 
   tabIcon: {
-    width: 106, // Adjust as needed
-    height: 70, // Adjust as needed
+    width: 50, // Adjust as needed
+    height: 50, // Adjust as needed
     //backgroundColor: 'black', // Background color for icon container
-    borderRadius: 22, // Half of the width and height to make it circular
+    borderRadius: 100, // Half of the width and height to make it circular
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 28,
@@ -345,8 +477,8 @@ const styles = StyleSheet.create({
   },
   activeTab: {
 
-    backgroundColor: '#FF6232', // Background color for the active tab
-    borderColor: '#FF6232', // Border color for the active tab
+    backgroundColor: '#00BFFF', // Background color for the active tab
+    borderColor: '#00BFFF', // Border color for the active tab
     borderWidth: 1, // Border width for the active tab
   },
   icon: {
@@ -355,18 +487,17 @@ const styles = StyleSheet.create({
   // marginLeft: 5,
   },
   
-  
   iconN: {
     fontSize: 30,
-    marginTop: -20,
+    marginTop: -5,
+    marginBottom: -5,
     //marginRight: 5,
    // marginLeft: 5,
    }, 
   backgroundImage: {
     flex: 1,
     resizeMode: 'cover', // or 'stretch'
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-  
+ 
   },
   backButtonWrapper: {
     height: 40,
@@ -392,7 +523,7 @@ const styles = StyleSheet.create({
   headingText: {
     fontSize: 30,
     color: '#471710',
-    fontFamily: fonts.SemiBold,
+    // fontFamily: fonts.SemiBold,
   },
   scrollView: {
     flex: 1,
@@ -417,8 +548,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginLeft: 10,
     color: 'black',
-    fontFamily: fonts.regular,
-    //fontWeight:'bold',
+    // fontFamily: fonts.regular,
+    fontWeight:'bold',
   },
   proceedButtonWrapper: {
     backgroundColor: '#FF6232',
@@ -432,7 +563,7 @@ const styles = StyleSheet.create({
   proceedText: {
     color: colors.white,
     fontSize: 20,
-    fontFamily: fonts.SemiBold,
+    // fontFamily: fonts.SemiBold,
     textAlign: "center",
     padding: 10,
   },
@@ -457,7 +588,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 24,
-    fontFamily: fonts.SemiBold,
+    // fontFamily: fonts.SemiBold,
     marginBottom: 15,
   },
   modalContent: {
@@ -466,7 +597,7 @@ const styles = StyleSheet.create({
   },
   modalText: {
     fontSize: 18,
-    fontFamily: fonts.Medium,
+    // fontFamily: fonts.Medium,
     marginBottom: 10,
   },
   confirmButtonWrapper: {
@@ -478,7 +609,7 @@ const styles = StyleSheet.create({
   },
   confirmText: {
     color: "white",
-    fontFamily: fonts.SemiBold,
+    // fontFamily: fonts.SemiBold,
     fontSize: 18,
     textAlign: "center",
   },
@@ -501,7 +632,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   profileText: {
-    fontFamily: fonts.regular,
+    // fontFamily: fonts.regular,
     fontSize: 20,
     marginTop: 10,
   },
@@ -515,7 +646,7 @@ const styles = StyleSheet.create({
     marginBottom:66,
   },
   logoutText: {
-    fontFamily: fonts.bold,
+    // fontFamily: fonts.bold,
     fontSize: 20,
     color: colors.white,
   },

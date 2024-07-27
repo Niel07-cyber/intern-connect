@@ -1,181 +1,203 @@
-import React from "react";
-import { View, Text, StyleSheet, ScrollView, ImageBackground } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  Image,
+  TextInput, // Add this import
+} from "react-native";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../../../config"; // Adjust the path as necessary
+import { FontAwesome } from '@expo/vector-icons';
 
-const NewScreen = () => {
-  // Sample data for internship orders
-  const data = [
-    {
-      orderNo: "REQ 001",
-      studentName: "John Doe",
-      companyName: "Volta River Authority MIS DEPARTMENT HEAD OFFICE",
-      dateOfLetter: "2024-07-03",
-      region: "Greater Accra Region ",
-      duration: "3 months",
-    },
-    {
-      orderNo: "REQ 002",
-      studentName: "Otis Perry",
-      companyName: "Byron Company Limited Corporate",
-      dateOfLetter: "2024-05-28",
-      region: "Ashanti Region ",
-      duration: "6 months",
-    },
+const StatusScreen = () => {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [expandedItem, setExpandedItem] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(""); // Add state for search query
 
-    {
-      orderNo: "REQ 002",
-      studentName: "Otis Perry",
-      companyName: "Byron Company Limited Corporate",
-      dateOfLetter: "2024-05-28",
-      region: "Central",
-      duration: "6 months",
-    },
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "messages"));
+        const messages = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setData(messages);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching data from Firestore:", error);
+        setLoading(false);
+      }
+    };
 
-    {
-      orderNo: "REQ 002",
-      studentName: "Otis Perry",
-      companyName: "Byron Company Limited Corporate",
-      dateOfLetter: "2024-05-28",
-      region: "Upper East",
-      duration: "6 months",
-    },
-    {
-      orderNo: "REQ 002",
-      studentName: "Otis Perry",
-      companyName: "Byron Company Limited Corporate",
-      dateOfLetter: "2024-05-28",
-      region: "Northern Region",
-      duration: "6 months",
-    },
-    // Add more data entries as needed
-  ];
+    fetchData();
+  }, []);
 
-  // Function to render each item
+  // Filter data based on search query
+  const filteredData = data.filter(item =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.studentId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.level.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const renderItems = () => {
-    return data.map((item, index) => (
-      <View style={styles.itemContainer} key={index}>
-        <Text style={[styles.item, styles.orderNo]}>{item.orderNo}</Text>
-        <Text style={[styles.item, styles.studentName]}>{item.studentName}</Text>
-        <Text style={[styles.item, styles.companyName]}>{item.companyName}</Text>
-        <Text style={[styles.item, styles.dateOfLetter]}>{item.dateOfLetter}</Text>
-        <Text style={[styles.item, styles.region]}>{item.region}</Text>
-        <Text style={[styles.item, styles.duration]}>{item.duration}</Text>
-      </View>
+    return filteredData.map((item) => (
+      <TouchableOpacity
+        style={styles.itemContainer}
+        key={item.id}
+        onPress={() => setExpandedItem(expandedItem === item.id ? null : item.id)}
+      >
+        <View style={styles.profileSummary}>
+          <Image
+            source={{ uri: item.profilePicture || 'https://via.placeholder.com/50' }}
+            style={styles.profileImage}
+          />
+          <Text style={styles.itemName}>{item.name}</Text>
+          <Text style={styles.itemDetail}>Student ID: {item.studentId}</Text>
+          <Text style={styles.itemDetail}>Level: {item.level}</Text>
+        </View>
+        {expandedItem === item.id && (
+          <View style={styles.profileDetails}>
+            <Text style={styles.itemDetail}>Index No: {item.indexNo}</Text>
+            <Text style={styles.itemDetail}>Email: {item.email}</Text>
+            <Text style={styles.itemDetail}>
+              Created At: {new Date(item.createdAt.seconds * 1000).toLocaleDateString()}
+            </Text>
+            <Text style={styles.itemDetail}>Course: {item.course}</Text>
+            <Text style={styles.itemDetail}>Company Name: {item.companyName}</Text>
+            <Text style={styles.itemDetail}>Company Address: {item.companyAddress}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
     ));
   };
 
   return (
-    <ImageBackground
-      source={require("../assets/wallpapertemp.jpg")}
-      style={styles.background}
-      resizeMode="cover"
-    >
-      <View style={styles.container}>
-        {/* Header */}
-        <Text style={styles.header}>Student Data</Text>
+    <View style={styles.container}>
+      <Text style={styles.header}>Database</Text>
+     
 
-        {/* ScrollView for scrollable content */}
-        <ScrollView horizontal>
-          <ScrollView contentContainerStyle={styles.scrollContent}>
-            {/* Table header */}
-            <View style={styles.tableHeader}>
-              <Text style={[styles.headerText, styles.orderNo]}>Request No</Text>
-              <Text style={[styles.headerText, styles.studentName]}>Student Name</Text>
-              <Text style={[styles.headerText, styles.companyName]}>Company Name</Text>
-              <Text style={[styles.headerText, styles.dateOfLetter]}>Date of Letter</Text>
-              <Text style={[styles.headerText, styles.region]}>Region</Text>
-              <Text style={[styles.headerText, styles.duration]}>Duration</Text>
-            </View>
-
-            {/* Render items */}
-            {renderItems()}
-          </ScrollView>
-        </ScrollView>
+      <View style={styles.searchBarContainer}>
+        <TextInput
+          style={styles.searchBar}
+          placeholder="Search..."
+          placeholderTextColor="#aaa"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        <FontAwesome name="search" size={20} color="#888" style={styles.searchIcon} />
       </View>
-    </ImageBackground>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      ) : (
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          {renderItems()}
+        </ScrollView>
+      )}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    resizeMode: 'cover',
-  },
   container: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
+    padding: 10,
+    backgroundColor: "#f5f5f5",
   },
+
+  
   header: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 20,
+    marginBottom: 25,
     textAlign: "center",
-    color: "#333",
+    color: "black",
   },
   scrollContent: {
     paddingBottom: 20,
   },
-  tableHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-    backgroundColor: "#FEDEAF",
-    paddingVertical: 10,
-    paddingHorizontal: 4,
-    borderRadius: 8,
+  searchBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 20,
+    backgroundColor: '#E3F2FD',
+    height: 40,
+    width: '80%', // Adjust width as needed
+  
   },
-  headerText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#471410",
-    paddingHorizontal: 5,
+  searchBar: {
+    flex: 1,
+    paddingHorizontal: 10,
+    fontSize:  16,
   },
+  searchIcon: {
+    paddingHorizontal: 10,
+  },
+
   itemContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-    backgroundColor: "#FFE7C8",
-    paddingVertical: 15,
-    paddingHorizontal: 4,
+    marginBottom: 15,
+    backgroundColor: "#fff",
     borderRadius: 8,
-    elevation: 3,
+    elevation: 2,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 1,
     },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    borderBottomWidth: 1,
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+    borderBottomWidth: 0.5,
     borderBottomColor: "#ddd",
+    padding: 10,
   },
-  item: {
+  profileSummary: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingBottom: 10,
+  },
+  profileImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 10,
+  },
+  itemName: {
     fontSize: 16,
+    fontWeight: "bold",
     color: "#333",
-    textAlign: "center",
-    paddingHorizontal: 5,
+    flex: 1, // Use flex to manage space distribution
+    marginRight: 5,
   },
-  orderNo: {
-    width: 120,
+  itemDetail: {
+    fontSize: 14,
+    color: "#555",
+    marginVertical: 2,
+    flex: 1, // Use flex to manage space distribution
+    textAlign: "left",
   },
-  studentName: {
-    width: 170,
+  profileDetails: {
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    backgroundColor: "#f9f9f9",
+    borderTopWidth: 1,
+    borderTopColor: "#ddd",
   },
-  companyName: {
-    width: 250,
-  },
-  dateOfLetter: {
-    width: 150,
-  },
-  region: {
-    width: 150,
-  },
-  duration: {
-    width: 150,
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 
-export default NewScreen;
+export default StatusScreen;

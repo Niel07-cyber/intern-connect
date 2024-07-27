@@ -1,75 +1,98 @@
-import React from "react";
-import { View, Text, StyleSheet, ScrollView, ImageBackground } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, ScrollView, ImageBackground, ActivityIndicator } from "react-native";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { db } from '../../../config'; // Adjust the path as necessary
 
 const NewScreen = () => {
-  // Sample data for internship orders, student names, company names, dates, and progress
-  const data = [
-    {
-      orderNo: "REQ 001",
-      studentName: "John Doe",
-      companyName: "Volta River Authority MIS DEPARTMENT HEAD OFFICE",
-      date: "2024-07-03",
-      progress: 0.5,
-    },
-    {
-      orderNo: "REQ 002",
-      studentName: "Otis Perry",
-      companyName: "Byron Company Limited Cperate",
-      date: "2024-05-28",
-      progress: 0.8,
-    },
-    // Add more data entries as needed
-  ];
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const auth = getAuth();
+  const currentUserId = auth.currentUser ? auth.currentUser.uid : null; // Get current user's ID
 
-  // Function to render each item
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!currentUserId) {
+        console.error("No user is logged in");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Query to fetch only documents where `userId` field matches the current user ID
+        const q = query(collection(db, "messages"), where("userId", "==", currentUserId));
+        const querySnapshot = await getDocs(q);
+
+        const messages = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        // Log the fetched data for debugging
+        console.log("Fetched messages:", messages);
+
+        // Set the fetched data to state
+        setData(messages);
+      } catch (error) {
+        console.error("Error fetching data from Firestore:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [currentUserId]);
+
   const renderItems = () => {
-    return data.map((item, index) => (
-      <View style={styles.itemContainer} key={index}>
-        <Text style={[styles.item, styles.orderNo]}>{item.orderNo}</Text>
-        <Text style={[styles.item, styles.studentName]}>{item.studentName}</Text>
+    return data.map((item) => (
+      <View style={styles.itemContainer} key={item.id}>
+        <Text style={[styles.item, styles.name]}>{item.name}</Text>
+        <Text style={[styles.item, styles.studentId]}>{item.studentId}</Text>
+        <Text style={[styles.item, styles.level]}>{item.level}</Text>
+        <Text style={[styles.item, styles.indexNo]}>{item.indexNo}</Text>
+        <Text style={[styles.item, styles.email]}>{item.email}</Text>
+        <Text style={[styles.item, styles.createdAt]}>{new Date(item.createdAt.seconds * 1000).toLocaleDateString()}</Text>
+        <Text style={[styles.item, styles.course]}>{item.course}</Text>
         <Text style={[styles.item, styles.companyName]}>{item.companyName}</Text>
-        <Text style={[styles.item, styles.date]}>{item.date}</Text>
-        <View style={styles.progressBar}>
-          <View
-            style={[
-              styles.progressFill,
-              { width: `${item.progress * 100}%` },
-            ]}
-          />
-        </View>
+        <Text style={[styles.item, styles.companyAddress]}>{item.companyAddress}</Text>
       </View>
     ));
   };
 
   return (
     <ImageBackground
-      source={require("../assets/wallpapertemp.jpg")} // Replace with your background image path
+      source={require("../assets/newbkkkkkkk2.jpg")}
       style={styles.background}
       resizeMode="cover"
     >
       <View style={styles.container}>
-        {/* Header */}
-        <Text style={styles.header}>Internship Status</Text>
-
-        {/* ScrollView for scrollable content */}
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Table header */}
-          <View style={styles.tableHeader}>
-            <Text style={[styles.headerText, styles.orderNo]}>Request No</Text>
-            <Text style={[styles.headerText, styles.studentName]}>Student Name</Text>
-            <Text style={[styles.headerText, styles.companyName]}>Company Name</Text>
-            <Text style={[styles.headerText, styles.date]}>Date of Request</Text>
-            <Text style={[styles.headerText, styles.progress]}>Progress</Text>
+        <Text style={styles.header}>Student Data</Text>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#0000ff" />
           </View>
-
-          {/* Render items */}
-          {renderItems()}
-        </ScrollView>
+        ) : (
+          <ScrollView horizontal>
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+              <View style={styles.tableHeader}>
+                <Text style={[styles.headerText, styles.name]}>Name</Text>
+                <Text style={[styles.headerText, styles.studentId]}>Student ID</Text>
+                <Text style={[styles.headerText, styles.level]}>Level</Text>
+                <Text style={[styles.headerText, styles.indexNo]}>Index No</Text>
+                <Text style={[styles.headerText, styles.email]}>Email</Text>
+                <Text style={[styles.headerText, styles.createdAt]}>Date of Request</Text>
+                <Text style={[styles.headerText, styles.course]}>Course</Text>
+                <Text style={[styles.headerText, styles.companyName]}>Company Name</Text>
+                <Text style={[styles.headerText, styles.companyAddress]}>Company Address</Text>
+              </View>
+              {renderItems()}
+            </ScrollView>
+          </ScrollView>
+        )}
       </View>
     </ImageBackground>
   );
 };
-
 const styles = StyleSheet.create({
   background: {
     flex: 1,
@@ -77,7 +100,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    //backgroundColor: "rgba(255, 255, 255, 0.3)", // Optional: semi-transparent background for better visibility
     paddingHorizontal: 20,
     paddingTop: 20,
   },
@@ -94,8 +116,9 @@ const styles = StyleSheet.create({
   tableHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 10,
-    backgroundColor: "#FEDEAF", // Header background color
+    backgroundColor: "#FEDEAF",
     paddingVertical: 10,
     paddingHorizontal: 4,
     borderRadius: 8,
@@ -104,64 +127,66 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
-    color: "#471410", // Header text color
-    borderRightWidth: 1, // Vertical line between columns
-    borderRightColor: "#fff", // Color of the vertical line
+    color: "#471410",
+    paddingHorizontal: 5,
   },
   itemContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start", // Align items to the top
+    alignItems: "center",
     marginBottom: 10,
-    backgroundColor: "#FFE7C8", // Item background color
+    backgroundColor: "#FFE7C8",
     paddingVertical: 15,
-    paddingHorizontal: 10,
+    paddingHorizontal: 4,
     borderRadius: 8,
-    elevation: 3, // Android shadow depth
-    shadowColor: "#000", // iOS shadow color
+    elevation: 3,
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
     },
     shadowOpacity: 0.2,
     shadowRadius: 2,
-    borderBottomWidth: 1, // Faint line between rows
-    borderBottomColor: "#ddd", // Color of the faint line
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
   },
-  
   item: {
     fontSize: 16,
-    flex: 1,
     color: "#333",
-    flexWrap: "wrap", // Allow text to wrap to the next line
-    borderRightWidth: 1, // Vertical line between columns
-    borderRightColor: "#ddd", // Color of the vertical line
+    textAlign: "center",
+    paddingHorizontal: 5,
   },
-  orderNo: {
-    flex: 1.2,
+  name: {
+    width: 150,
   },
-  studentName: {
-    flex: 2,
+  studentId: {
+    width: 150,
+  },
+  level: {
+    width: 100,
+  },
+  indexNo: {
+    width: 150,
+  },
+  email: {
+    width: 250,
+  },
+  createdAt: {
+    width: 150,
+  },
+  course: {
+    width: 200,
   },
   companyName: {
-    flex: 2,
+    width: 250,
   },
-  date: {
-    flex: 1.3,
+  companyAddress: {
+    width: 300,
   },
-  progress: {
+  loadingContainer: {
     flex: 1,
-  },
-  progressBar: {
-    backgroundColor: "#ddd",
-    height: 10,
-    borderRadius: 5,
-    overflow: "hidden",
-    width: "10%", // Ensure full width
-  },
-  progressFill: {
-    height: "100%",
-    backgroundColor: "#FFD700", // Default color (yellow) for pending
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

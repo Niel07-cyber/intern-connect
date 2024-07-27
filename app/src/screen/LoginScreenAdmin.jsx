@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   ImageBackground,
   Linking,
+  Alert,
 } from "react-native";
 import React, { useState } from "react";
 import { colors } from "../utils/colors";
@@ -16,14 +17,19 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
 import { useNavigation } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
-import { firebase } from "../../../config";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { getFirestore, doc, getDoc, query, where, getDocs,
+  collection, 
+   } from "firebase/firestore";
+import { auth, db } from "../../../config"; // Ensure this path is correct
 
 const LoginScreenAdmin = () => {
   const navigation = useNavigation();
   const [secureEntry, setSecureEntry] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [Email, setEmail] = useState('') 
-  const [Password, setPassword] = useState('')
+  const [email, setEmail] = useState(''); 
+  const [password, setPassword] = useState('');
+
   const handleGoBack = () => {
     navigation.goBack();
   };
@@ -32,34 +38,44 @@ const LoginScreenAdmin = () => {
     navigation.navigate("SIGNUPA");
   };
 
-  const loginUser = async (Email, Password) => {
-    setLoading(true); // Start loading
-    try {
-      await firebase.auth().signInWithEmailAndPassword(Email, Password);
-      setLoading(false); // Stop loading upon success
-      navigation.navigate('INPUTA');
-    } catch (error) {
-      setLoading(false); // Stop loading upon error
-      alert(error.message);
-    }}
-
-  const handleLogin = () => {
+  const loginUser = async (email, password) => {
     setLoading(true);
-    setTimeout(() => {
+    console.log('email, password', email, password);
+
+    try {
+      // Check Firestore for admin credentials
+      const adminQuery = query(
+        collection(db, 'admin'),
+        where('email', '==', email),
+        where('password', '==', password)
+      );
+      
+      const querySnapshot = await getDocs(adminQuery);
+
+      if (!querySnapshot.empty) {
+        setLoading(false);
+        navigation.navigate('INPUTA'); // Navigate to admin screen
+      } else {
+        console.log('No matching admin credentials found!');
+        Alert.alert("Login Error", "You are not authorized as an admin.");
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
       setLoading(false);
-      navigation.navigate('INPUTA');
-    }, 2000); // 2 seconds delay
+      Alert.alert("Login Error", error.message || "An unknown error occurred.");
+    }
   };
 
-  
+  const handleLogin = () => {
+    loginUser(email, password);
+  };
+
   const handleOpenLink = () => {
     Linking.openURL("https://apps.knust.edu.gh/Staff/Account/LogOn?ReturnUrl=%2FStaffs"); // Replace with your desired URL
   };
+
   return (
-    <ImageBackground
-      source={require("../assets/wallpapertemp.jpg")} // Replace with your actual background image
-      style={styles.background}
-    >
+  
       <View style={styles.container}>
         <TouchableOpacity style={styles.backButtonWrapper} onPress={handleGoBack}>
           <Ionicons
@@ -79,8 +95,8 @@ const LoginScreenAdmin = () => {
             <SimpleLineIcons name="envelope" size={30} color={colors.primary} />
               <TextInput
                 style={styles.textInput}
-                placeholder="Email"
-                onChangeText={(Email) => setEmail(Email)}
+                placeholder="email"
+                onChangeText={(email) => setEmail(email)}
                 autoCapitalize="none"
                 autoCorrect={false}
                 placeholderTextColor={colors.secondary}
@@ -93,7 +109,7 @@ const LoginScreenAdmin = () => {
               <TextInput
                 style={styles.textInput}
                 placeholder="Password"
-                onChangeText={(Password) => setPassword(Password)}
+                onChangeText={(password) => setPassword(password)}
                 autoCapitalize="none"
                 autoCorrect={false}
                 placeholderTextColor={colors.secondary}
@@ -112,7 +128,7 @@ const LoginScreenAdmin = () => {
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.loginButtonWrapper}
-            onPress={() => loginUser(Email, Password)}
+            onPress={() => loginUser(email, password)}
             disabled={loading}
           >
             {loading ? (
@@ -129,10 +145,16 @@ const LoginScreenAdmin = () => {
                 />
                 <Text style={styles.googleText}>Staff Portal</Text>
               </TouchableOpacity>
+              <View style={styles.footerContainer}>
+              <Text style={styles.accountText}>Don’t have an account?</Text>
+              <TouchableOpacity onPress={handleSignup}>
+                <Text style={styles.signupText}>Sign up</Text>
+              </TouchableOpacity>
+            </View>
          
         </View>
       </View>
-    </ImageBackground>
+  
   );
 };
 
@@ -142,11 +164,12 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     resizeMode: 'cover',
+   
   },
   container: {
     flex: 1,
     padding: 20,
-   // backgroundColor: 'rgba(255, 255, 255, 0.4)', // Optional: semi-transparent background for better visibility
+    backgroundColor: 'white',
   },
   backButtonWrapper: {
     height: 40,
@@ -190,7 +213,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   loginButtonWrapper: {
-    backgroundColor: '#FF6232',
+    backgroundColor: 'red',
     borderRadius: 100,
     marginTop: 20,
     justifyContent: "center",
