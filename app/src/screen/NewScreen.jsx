@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView, ImageBackground, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { db } from '../../../config'; // Adjust the path as necessary
@@ -60,55 +60,47 @@ const NewScreen = () => {
   };
 
   return (
-    <ImageBackground
-      source={require("../assets/newbkkkkkkk2.jpg")}
-      style={styles.background}
-      resizeMode="cover"
-    >
-      <View style={styles.container}>
-        <Text style={styles.header}>Student Data</Text>
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#0000ff" />
-          </View>
-        ) : (
-          <ScrollView horizontal>
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-              <View style={styles.tableHeader}>
-                <Text style={[styles.headerText, styles.name]}>Name</Text>
-                <Text style={[styles.headerText, styles.studentId]}>Student ID</Text>
-                <Text style={[styles.headerText, styles.level]}>Level</Text>
-                <Text style={[styles.headerText, styles.indexNo]}>Index No</Text>
-                <Text style={[styles.headerText, styles.email]}>Email</Text>
-                <Text style={[styles.headerText, styles.createdAt]}>Date of Request</Text>
-                <Text style={[styles.headerText, styles.course]}>Course</Text>
-                <Text style={[styles.headerText, styles.companyName]}>Company Name</Text>
-                <Text style={[styles.headerText, styles.companyAddress]}>Company Address</Text>
-              </View>
-              {renderItems()}
-            </ScrollView>
+    <View style={styles.container}>
+      <Text style={styles.header}>Student Data</Text>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007BFF" />
+        </View>
+      ) : (
+        <ScrollView horizontal>
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            <View style={styles.tableHeader}>
+              <Text style={[styles.headerText, styles.name]}>Name</Text>
+              <Text style={[styles.headerText, styles.studentId]}>Student ID</Text>
+              <Text style={[styles.headerText, styles.level]}>Level</Text>
+              <Text style={[styles.headerText, styles.indexNo]}>Index No</Text>
+              <Text style={[styles.headerText, styles.email]}>Email</Text>
+              <Text style={[styles.headerText, styles.createdAt]}>Date of Request</Text>
+              <Text style={[styles.headerText, styles.course]}>Course</Text>
+              <Text style={[styles.headerText, styles.companyName]}>Company Name</Text>
+              <Text style={[styles.headerText, styles.companyAddress]}>Company Address</Text>
+            </View>
+            {renderItems()}
           </ScrollView>
-        )}
-      </View>
-    </ImageBackground>
+        </ScrollView>
+      )}
+    </View>
   );
 };
+
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    resizeMode: 'cover',
-  },
   container: {
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 20,
+    backgroundColor: '#F5F5F5', // Light gray background
   },
   header: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center",
-    color: "#333",
+    color: "black", // Blue color for the header
   },
   scrollContent: {
     paddingBottom: 20,
@@ -118,16 +110,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 10,
-    backgroundColor: "#FEDEAF",
+    backgroundColor: "#E6F2FF", // Light blue background for header
     paddingVertical: 10,
     paddingHorizontal: 4,
     borderRadius: 8,
+    borderBottomWidth: 2,
+    borderBottomColor: "#007BFF", // Blue border bottom
   },
   headerText: {
     fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
-    color: "#471410",
+    color: "#007BFF", // Blue color for header text
     paddingHorizontal: 5,
   },
   itemContainer: {
@@ -135,20 +129,20 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 10,
-    backgroundColor: "#FFE7C8",
+    backgroundColor: "#FFFFFF", // White background for items
     paddingVertical: 15,
     paddingHorizontal: 4,
     borderRadius: 8,
-    elevation: 3,
+    elevation: 2,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 1,
     },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.1,
     shadowRadius: 2,
     borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
+    borderBottomColor: "#E6E6E6", // Light gray bottom border
   },
   item: {
     fontSize: 16,

@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View, ImageBackground, ActivityIndicator } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from "react-native";
 import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from '@expo/vector-icons'; // Import Ionicons for the arrow
@@ -43,9 +43,10 @@ const GetStarted = () => {
       <Text style={styles.subTitle}>
         Welcome to InternConnect, Access to internship letters made fast, simple, and easy. Connect with HOD now!
       </Text>
-      {isLoading ? (
+      {isLoading && (
         <ActivityIndicator size="large" color="#00BFFF" style={styles.loadingIndicator} />
-      ) : (
+      )}
+      {!isLoading && (
         <TouchableOpacity style={styles.getStartedButton} onPress={handleGetStarted}>
           <Text style={styles.getStartedButtonText}>Get Started</Text>
           <Ionicons name="arrow-forward" size={20} color="#fff" />
@@ -115,7 +116,6 @@ const styles = StyleSheet.create({
     bottom: 30,
     left: 20,
     zIndex: 1,
-    marginTop: -340,
   },
   getStartedButtonText: {
     color: "#fff",
@@ -125,6 +125,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
   loadingIndicator: {
-    marginTop: 100,
+    position: 'absolute',
+    bottom: 70, // Adjust as needed to place the indicator below the welcome text
   },
 });

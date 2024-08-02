@@ -97,7 +97,7 @@ const InputScreen = () => {
     navigation.navigate('SIGNINNEW');
   };
   return (
-    <ImageBackground source={require('../assets/newbkkkkkkk2.jpg')} style={styles.backgroundImage}>
+  
       <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <TouchableOpacity style={styles.backButtonWrapper} onPress={handleGoBack}>
           <Ionicons name={"arrow-back-outline"} color={'gray'} size={25} />
@@ -292,7 +292,7 @@ const InputScreen = () => {
        
       </KeyboardAvoidingView>
     
-   </ImageBackground>
+
   );
 };
 
@@ -484,7 +484,7 @@ const styles = StyleSheet.create({
   backButtonWrapper: {
     height: 40,
     width: 40,
-    backgroundColor: colors.gray,
+    backgroundColor: "#ddd",
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",

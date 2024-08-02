@@ -1,51 +1,203 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
   ScrollView,
-  Modal,
   Alert,
   KeyboardAvoidingView,
   Platform,
-  ImageBackground,
+  Linking,
 } from "react-native";
-import { colors } from "../utils/colors";
-import { fonts } from "../utils/fonts";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { FontAwesome, FontAwesome5, AntDesign, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome5, FontAwesome, MaterialCommunityIcons, } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../../config"; // Adjust the path as necessary
+import axios from 'axios';
 
 import HomeScreenAdmin from "./HomeScreenAdmin";
 import StatusScreen from "./StatusScreen";
 
+const PDFCO_API_KEY = 'aryeeothniel@gmail.com_wZ1Ww5fKO5MDC9zRFTEAqYqYIwNZJtBZJ8HrfkYop5EhtFWYv6BfOqOrNPcJI8by'; // Replace with your PDF.co API key
+
 const InputScreen = () => {
   const navigation = useNavigation();
-  const [secureEntry, setSecureEntry] = useState(true);
-
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [studentId, setStudentId] = useState("");
-  const [course, setCourse] = useState("");
-  const [indexNo, setIndexNo] = useState("");
-  const [level, setLevel] = useState("");
-  const [companyName, setCompanyName] = useState("");
-  const [companyAddress, setCompanyAddress] = useState("");
-
+  const [data, setData] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
-  const [profileModalVisible, setProfileModalVisible] = useState(false);
-  const [generatedLetter, setGeneratedLetter] = useState("");
+const [email, setEmail] = useState('');
+const [pdfUrl, setPdfUrl] = useState('');
 
   const handleGoBack = () => {
     navigation.goBack();
   };
+  const showModal = () => setModalVisible(true);
+  const hideModal = () => setModalVisible(false);
 
-  const handleProceed = () => {
-    // Simulate letter generation logic
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const docRef = doc(db, "messages", "IkWesJof9uSaPw7dFD4euyAtv0L2"); // Replace "documentId" with the actual document ID
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const messageData = docSnap.data();
+          setData(messageData);
+        } else {
+          console.log("No such document!");
+        }
+      } catch (error) {
+        console.error("Error fetching document from Firestore:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+  const handleProceed = async () => {
+    const imageUrl = 'https://th.bing.com/th/id/R.d6b7eeb68cc5706c6834c7a8e728e907?rik=x1zgW0k9qfD4yw&pid=ImgRaw&r=0'; // Replace with your actual image URL
+    const letter = `
+      <html>
+      <head>
+        <style>
+          @page {
+            margin: 0.5in;
+          }
+          body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+          .container {
+            width: 100%;
+            min-height: 100%;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+          }
+          .header {
+            text-align: center;
+            margin-bottom: 20px;
+          }
+          .header img {
+            width: 100px; /* Set the desired width */
+            height: auto; /* Maintain aspect ratio */
+          }
+          .address {
+            margin-bottom: 20px;
+            text-align: right;
+          }
+          .address p {
+            margin: 0;
+          }
+          .recipient {
+            margin-bottom: 20px;
+          }
+          .recipient p {
+            margin: 0;
+          }
+          .content {
+            flex: 1; /* Allows the content area to expand */
+            margin-bottom: 20px;
+          }
+          .signature {
+            margin-top: 40px;
+            text-align: right;
+          }
+          .signature img {
+            width: 100px; /* Set the desired width */
+            height: auto; /* Maintain aspect ratio */
+          }
+          .footer {
+            text-align: center;
+            margin-top: 20px;
+          }
+          .footer {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+           <img src="${imageUrl}" alt="Institution Logo" />
+            <h2>Kwame Nkrumah University of Science and Technology</h2>
+          </div>
+          <div class="address">
+            <p>Date: ${new Date().toLocaleDateString()}</p>
+            <p>Address Line 1</p>
+            <p>Address Line 2</p>
+            <p>Kumasi, SG 573</p>
+            <p>0203823354</p>
+            <p>knustcos@yahoo.com</p>
+          </div>
+          <div class="recipient">
+            <p>${data.companyName}</p>
+            <p>Recipient's Position</p>
+            <p>${data.companyName}</p>
+            <p>${data.companyAddress}</p>
+            <p>Company Address Line 2</p>
+            <p>City, Postal Code</p>
+          </div>
+          <div class="content">
+            <p>Dear Sir/Madam,</p>
+            <p>This is to certify that ${data.name}, a student of ${data.course} with Student ID ${data.studentId} and Index No ${data.indexNo}, 
+            is currently in ${data.level} level at our institution.</p>
+            <p>A request has been made for an internship letter to be issued for ${data.companyName}, 
+            located at ${data.companyAddress}.</p>
+            <p>I hereby authorize ${data.name} to have an internship experience with your company to be able to build skills and get equipped.</p>
+            <p>Sincerely,</p>
+          </div>
+          <div class="signature">
+            <img src="https://th.bing.com/th/id/R.938942ebf592b4ffd367e29aa7412466?rik=ZSuqBkY0R24v5Q&riu=http%3a%2f%2fwww.clipartbest.com%2fcliparts%2f9iz%2fLEd%2f9izLEdR4T.jpg&ehk=C0ojxdfIONA2Tb%2fZ48eteAgg2Z37AYwpSj%2fNG7cCkqM%3d&risl=&pid=ImgRaw&r=0" alt="Signature" />
+            <p>Hayfron Acquah</p>
+            <p>Head of Department (HOD)</p>
+            <p>Kwame Nkrumah University of Science and Technology</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  
+    try {
+      const response = await axios.post(
+        'https://api.pdf.co/v1/pdf/convert/from/html', 
+        { name: 'internship_letter.pdf', html: letter }, 
+        { headers: { 'x-api-key': PDFCO_API_KEY, 'Content-Type': 'application/json' } }
+      );
+  
+      const { url } = response.data;
+      if (url) {
+        setPdfUrl(url);
+        Linking.openURL(url);
+      } else {
+        Alert.alert("Error", "Failed to generate PDF.");
+      }
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      Alert.alert("Error", "Failed to generate PDF.");
+    }
+  };
+  
+  
+  
+  
+ const previewLetter = async () => {
     const letter = `
       [Kwame Nkrumah University Of Science and Technology]
       
@@ -53,134 +205,98 @@ const InputScreen = () => {
       
       To whom it may concern,
       
-      This is to certify that ${name}, a student of ${course} with Student ID ${studentId} and Index No ${indexNo}, 
-      is currently in ${level} level at our institution.
+      This is to certify that ${data.name}, a student of ${data.course} with Student ID ${data.studentId} and Index No ${data.indexNo}, 
+      is currently in ${data.level} level at our institution.
       
-      A requested for an internship letter to be issued for ${companyName}, 
-      located at ${companyAddress}.
+      A requested for an internship letter to be issued for ${data.companyName}, 
+      located at ${data.companyAddress}.
       
       Sincerely,
       Hayfron Acquah
       HOD
     `;
-    
-    setGeneratedLetter(letter);
-    setModalVisible(true);
-  };
 
-  const handleConfirm = () => {
-    setModalVisible(false);
-    Alert.alert("Success!", "Letter Sent to mail.");
-    clearForm();
+ 
   };
-
-  const clearForm = () => {
-    setName("");
-    setEmail("");
-    setStudentId("");
-    setCourse("");
-    setIndexNo("");
-    setLevel("");
-    setCompanyName("");
-    setCompanyAddress("");
+  const sendEmailAsPdf = () => {
+    if (!email) {
+      Alert.alert("Error", "Please enter an email address.");
+      return;
+    }
+  
+    // Add email sending logic here
+    Alert.alert("Success", "PDF sent to " + email);
   };
-
-  const handleProfilePress = () => {
-    setProfileModalVisible(true);
-  };
-
-  const handleCloseProfileModal = () => {
-    setProfileModalVisible(false);
-  };
-
-  const handleLogout = () => {
-    setProfileModalVisible(false);
-    navigation.navigate('LOGINA');
-  };
-
   return (
-<ImageBackground source={require('../assets/newbkkkkk3.jpg')} style={styles.backgroundImage}>
-
-      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
-        <TouchableOpacity style={styles.backButtonWrapper} onPress={handleGoBack}>
-          <Ionicons name={"arrow-back-outline"} color={colors.primary} size={25} />
-        </TouchableOpacity>
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+      <TouchableOpacity style={styles.backButtonWrapper} onPress={handleGoBack}>
+        <Ionicons name={"arrow-back-outline"} color={"#000"} size={25} />
+      </TouchableOpacity>
       
-        <View style={styles.textContainer}>
-          <Text style={styles.headingText}>Intern Letter</Text>
-        </View>
-        <ScrollView style={styles.scrollView}>
-          <View style={styles.formContainer}>
-            
+      <View style={styles.textContainer}>
+        <Text style={styles.headingText}>Intern Letter</Text>
+      </View>
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.formContainer}>
           <View style={styles.buttonContainer}>
-  <TouchableOpacity style={styles.largeButton1} onPress={handleProceed}>
-    <View style={styles.buttonContent}>
-      <View style={styles.iconContainer}>
-      <FontAwesome5 name="file-signature" size={25} color="#33CC33" />
-
-      </View>
-    </View>
-    <Text style={styles.buttonText}>Generate</Text>
-  </TouchableOpacity>
-  <TouchableOpacity style={styles.largeButton2} onPress={handleProceed}>
-    <View style={styles.buttonContent}>
-      <View style={styles.iconContainer2}>
-      <FontAwesome5 name="pen" size={25} color="#FF6666" />
-
-      </View>
-    </View>
-    <Text style={styles.buttonText}>Edit</Text>
-  </TouchableOpacity>
-  <TouchableOpacity style={styles.largeButton3} onPress={handleProceed}>
-    <View style={styles.buttonContent}>
-      <View style={styles.iconContainer3}>
-      <FontAwesome5 name="file-pdf" size={30} color="#1E90FF" />
-
-
-
-      </View>
-    </View>
-    <Text style={styles.buttonText}>Review</Text>
-  </TouchableOpacity>
-  <TouchableOpacity style={styles.largeButton4} onPress={handleProceed}>
-    <View style={styles.buttonContent}>
-      <View style={styles.iconContainer4}>
-        <FontAwesome name="file-text" size={30} color="#B57EDC" />
-      </View>
-    </View>
-    <Text style={styles.buttonText}>Preview</Text>
-  </TouchableOpacity>
-</View>
-
-
+            {/* Existing Buttons */}
+            <TouchableOpacity style={styles.largeButton1} onPress={showModal}>
+              <View style={styles.buttonContent}>
+                <View style={styles.iconContainer}>
+                  <FontAwesome5 name="file-signature" size={25} color="#33CC33" />
+                </View>
+              </View>
+              <Text style={styles.buttonText}>Generate</Text>
+            </TouchableOpacity>
+            {/* Other buttons */}
           </View>
-        </ScrollView>
+        </View>
+      </ScrollView>
+  
+      {modalVisible && (
+  <View style={styles.modalView}>
+    <View style={styles.modalContent}>
+      <Text style={styles.modalTitle}>Letter Preview</Text>
+      <ScrollView style={styles.letterScrollView}>
+        <Text style={styles.generatedLetterText}>
+          {`
+            [Kwame Nkrumah University Of Science and Technology]
+            
+            Date: ${new Date().toLocaleDateString()}
+            
+            To whom it may concern,
+            
+            This is to certify that ${data.name}, a student of ${data.course} with Student ID ${data.studentId} and Index No ${data.indexNo}, 
+            is currently in ${data.level} level at our institution.
+            
+            A request has been made for an internship letter to be issued for ${data.companyName}, 
+            located at ${data.companyAddress}.
+            
+            Sincerely,
+            Hayfron Acquah
+            HOD
+          `}
+        </Text>
+      </ScrollView>
+      <TouchableOpacity style={styles.confirmButton} onPress={handleProceed}>
+        <Text style={styles.confirmButtonText}>Preview Letter</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.confirmButton} onPress={() => sendEmailAsPdf()}>
+        <Text style={styles.confirmButtonText}>Send Email as PDF</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.confirmButton} onPress={() => {/* Select Students Logic */}}>
+        <Text style={styles.confirmButtonText}>Select Students</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.confirmButton} onPress={hideModal}>
+        <Text style={styles.confirmButtonText}>Close</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+)}
 
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(false);
-          }}
-        >
-          <View style={styles.modalView}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Generated Letter</Text>
-              <ScrollView style={styles.letterScrollView}>
-                <Text style={styles.generatedLetterText}>{generatedLetter}</Text>
-              </ScrollView>
-              <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
-                <Text style={styles.confirmButtonText}>Confirm</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-
-      
-      </KeyboardAvoidingView>
- </ImageBackground>
+    </KeyboardAvoidingView>
   );
+  
 };
 
 const Tab = createBottomTabNavigator();
@@ -190,25 +306,24 @@ const InputScreenWithTabs = () => {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarStyle: {
-          backgroundColor: '#fff', // White background for the tabs
-          borderTopColor: 'transparent', // Remove the top border
-          //borderRadius: 25, // Rounded corners for the tab bar
-          paddingBottom: 5, // Adjust padding at the bottom
-          marginBottom: 0, // Move the tab bar up
-          height: 80, // Increase the height to fit the U-shape
+          backgroundColor: '#fff',
+          borderTopColor: 'transparent',
+          paddingBottom: 5,
+          marginBottom: 0,
+          height: 80,
         },
-        tabBarActiveTintColor: '#000', // Color of the active tab icon and label
-        tabBarInactiveTintColor: 'gray', // Color of inactive tab icons and labels
-        tabBarShowLabel: false, // Hide labels
+        tabBarActiveTintColor: '#000',
+        tabBarInactiveTintColor: 'gray',
+        tabBarShowLabel: false,
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
           let IconComponent;
           
           if (route.name === 'Home') {
             iconName = 'home';
-            IconComponent = AntDesign;
+            IconComponent = FontAwesome;
           } else if (route.name === 'New Request') {
-            iconName = "file-document" ;
+            iconName = "file-document";
             IconComponent = MaterialCommunityIcons;
           } else if (route.name === 'Progress') {
             iconName = "database";
@@ -217,19 +332,17 @@ const InputScreenWithTabs = () => {
 
           return (
             <View style={[styles.tabIcon, focused && styles.activeTab]}>
-              <IconComponent name={iconName} size={35} color={color} style={styles.iconN} />
+              <IconComponent name={iconName} size={35} color={color} />
             </View>
           );
         },
       })}
-      
     >
       <Tab.Screen
         name="Home"
         component={HomeScreenAdmin}
         options={{
           headerShown: false,
-          tabBarLabel: '', // Label for the tab
         }}
       />
       <Tab.Screen
@@ -237,7 +350,6 @@ const InputScreenWithTabs = () => {
         component={InputScreen}
         options={{
           headerShown: false,
-          tabBarLabel: '', // Label for the tab
         }}
       />
       <Tab.Screen
@@ -245,276 +357,27 @@ const InputScreenWithTabs = () => {
         component={StatusScreen}
         options={{
           headerShown: false,
-          tabBarLabel: '', // Label for the tab
         }}
       />
     </Tab.Navigator>
-
-  
-
   );
 };
 
- 
-export default InputScreenWithTabs; 
-
+export default InputScreenWithTabs;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  
-  },
-  backgroundImage: {
-    flex: 1,
-    resizeMode: 'cover', // or 'stretch'
-  },
-  largeButton1: {
-    borderWidth: 1,
-    borderRadius: 20,
-    padding: 5, // Reduced padding
-    width: 80, // Fixed width
-    height: 80, // Fixed height
-    backgroundColor: '#CCFFCC',
-    borderColor: '#CCFFCC',
-    alignItems: 'center', // Center content horizontally
-  },
-  largeButton2: {
-    borderWidth: 1,
-    borderRadius: 20,
-    padding: 5, // Reduced padding
-    width: 80, // Fixed width
-    height: 80, // Fixed height
-    backgroundColor: '#FFCCCC',
-    borderColor: '#FFCCCC',
-    alignItems: 'center', // Center content horizontally
-    justifyContent: 'center', // Center content vertically
-  },
-  largeButton3: {
-    borderWidth: 1,
-    borderRadius: 20,
-    padding: 5, // Reduced padding
-    width: 80, // Fixed width
-    height: 80, // Fixed height
-    backgroundColor: '#E6F7FF',
-    borderColor: '#E6F7FF',
-    alignItems: 'center', // Center content horizontally
-  },
-  largeButton4: {
-    borderWidth: 1,
-    borderRadius: 20,
-    padding: 5, // Reduced padding
-    width: 80, // Fixed width
-    height: 80, // Fixed height
-    backgroundColor: '#F3E5FF',
-    borderColor: '#F3E5FF',
-    alignItems: 'center', // Center content horizontally
-  },
-  adminText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.primary, // Example color
-    padding: 10,
-    //backgroundColor: '#000', // Background color
-    borderRadius: 5, // Rounded corners
-    textAlign: 'center', // Centered text
-  },
-  backgroundImage: {
-    flex: 1,
-    resizeMode: 'cover', // or 'stretch'
- 
-  
-  },
-  iconContainer: {
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#CCFFCC',
-    borderRadius: 100, // Circle shape for the icon container
-    backgroundColor: '#CCFFCC',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  iconContainer2: {
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#FFCCCC',
-    borderRadius: 100, // Circle shape for the icon container
-    backgroundColor: '#FFCCCC',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  iconContainer3: {
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#E6F7FF',
-    borderRadius: 100, // Circle shape for the icon container
-    backgroundColor: '#E6F7FF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconContainer4: {
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#F3E5FF',
-    borderRadius: 100, // Circle shape for the icon container
-    backgroundColor: '#F3E5FF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-
-  onlineIndicator: {
-    width: 10,
-    height: 10,
-    borderRadius: 10,
-    backgroundColor: 'green',
-    marginRight: 10,
-    marginTop: -8,
-  },
-
-buttonContainer: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 13,
-    marginTop: 20,
-  },
-  smallButton: {
-    backgroundColor: 'cyan', // Button background color
-    height: 60, // Height of the button
-    width: 60, // Width of the button
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 10, // Square corners
-  },
-  buttonText: {
-    fontSize: 12, // Smaller font size
-    textAlign: 'center',
-    marginTop: -5,
-    color: '#000', // Text color
-  },
-  buttonContent: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  icon1: {
-    padding: 10,
-    borderWidth: 1,
-    borderColor: 'white',
-    borderRadius:200,
-    backgroundColor: 'white',
-    
-    
-    
-  },
-  
-  closeProfileModal: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-  },
-  profileContent: {
-    alignItems: 'center',
-
-  },
-  profileRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray,
-    paddingVertical: 10,
-    marginTop:10,
-   
-  },
-  profileLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.primary,
-  },
-  profileValue: {
-    fontSize: 16,
-    color: colors.darkGray,
-  },
-  logoutButton: {
-    marginTop: 20,
-    backgroundColor: colors.primary,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignSelf: 'stretch', // Ensure the button stretches to fit its container
-  },
-  logoutText: {
-    color: 'blue',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-
-
-  multilineInput: {
-    height: 140, // Adjust the height as needed for multiline input
-    textAlignVertical: "top", // Ensure text starts from the top
-  },
-
-  multilineInput1: {
-    height: 80, // Adjust the height as needed for multiline input
-    textAlignVertical: "top", // Ensure text starts from the top
-  },
-
- 
-  tabIcon: {
-    width: 50, // Adjust as needed
-    height: 50, // Adjust as needed
-    //backgroundColor: 'black', // Background color for icon container
-    borderRadius: 100, // Half of the width and height to make it circular
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 28,
-    
-  },
-  activeTab: {
-
-    backgroundColor: '#00BFFF', // Background color for the active tab
-    borderColor: '#00BFFF', // Border color for the active tab
-    borderWidth: 1, // Border width for the active tab
-  },
-  icon: {
-   fontSize: 24,
-   //marginRight: 5,
-  // marginLeft: 5,
-  },
-  
-  iconN: {
-    fontSize: 30,
-    marginTop: -5,
-    marginBottom: -5,
-    //marginRight: 5,
-   // marginLeft: 5,
-   }, 
-  backgroundImage: {
-    flex: 1,
-    resizeMode: 'cover', // or 'stretch'
- 
   },
   backButtonWrapper: {
     height: 40,
     width: 40,
-    backgroundColor: colors.gray,
+    backgroundColor: "#ddd",
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
-    marginTop:15,
+    marginTop: 15,
     marginLeft: 15,
-  },
-  profileButton: {
-    position: 'absolute',
-    top: 40,
-    right: 10,
-    padding: 10,
-    zIndex: 10, // Ensure it's above other components
   },
   textContainer: {
     marginVertical: 10,
@@ -523,7 +386,6 @@ buttonContainer: {
   headingText: {
     fontSize: 30,
     color: '#471710',
-    // fontFamily: fonts.SemiBold,
   },
   scrollView: {
     flex: 1,
@@ -531,126 +393,128 @@ buttonContainer: {
   formContainer: {
     marginTop: 18,
   },
-  inputContainer: {
-    flexDirection: "row",
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+  buttonContainer: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 13,
+    marginTop: 20,
+  },
+  largeButton1: {
     borderWidth: 1,
-    borderColor: colors.secondary,
-    marginBottom: 18,
-    marginLeft: 25,
-    marginRight:25,
-    
+    borderRadius: 20,
+    padding: 5,
+    width: 80,
+    height: 80,
+    backgroundColor: '#CCFFCC',
+    borderColor: '#CCFFCC',
+    alignItems: 'center',
   },
-  textInput: {
-    flex: 1,
-    fontSize: 15,
-    marginLeft: 10,
-    color: 'black',
-    // fontFamily: fonts.regular,
-    fontWeight:'bold',
+  largeButton2: {
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 5,
+    width: 80,
+    height: 80,
+    backgroundColor: '#FFCCCC',
+    borderColor: '#FFCCCC',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  proceedButtonWrapper: {
-    backgroundColor: '#FF6232',
-    borderRadius: 100,
-    marginTop: 5,
-    width: "50%",
-    alignItems: "center",
-    marginLeft: 180,
-    marginBottom: 12,
+  largeButton3: {
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 5,
+    width: 80,
+    height: 80,
+    backgroundColor: '#E6F7FF',
+    borderColor: '#E6F7FF',
+    alignItems: 'center',
   },
-  proceedText: {
-    color: colors.white,
-    fontSize: 20,
-    // fontFamily: fonts.SemiBold,
-    textAlign: "center",
-    padding: 10,
+  largeButton4: {
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 5,
+    width: 80,
+    height: 80,
+    backgroundColor: '#F3E5FF',
+    borderColor: '#F3E5FF',
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  buttonContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 5,
+  },
+  iconContainer2: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 5,
+  },
+  iconContainer3: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 5,
+  },
+  iconContainer4: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 5,
   },
   modalView: {
-    flex: 0.7,
+    flex: 800,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: "25%",
-    marginHorizontal: 20,
-    backgroundColor: "white",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Dark overlay
+    paddingHorizontal: 20, // Add horizontal padding to ensure modal is centered
+  },
+  modalContent: {
+    width: "100%", // Full width of the screen
+    maxHeight: "100%", // Ensure it doesn't exceed screen height
+    backgroundColor: "#fff",
     borderRadius: 20,
-    padding: 35,
+    padding: 20,
     alignItems: "center",
+    justifyContent: "center", // Center content vertically
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
   },
   modalTitle: {
-    fontSize: 24,
-    // fontFamily: fonts.SemiBold,
-    marginBottom: 15,
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
   },
-  modalContent: {
-    width: "100%",
-    marginBottom: 15,
+  letterScrollView: {
+    marginBottom: 20,
+    maxHeight: 300,
   },
-  modalText: {
-    fontSize: 18,
-    // fontFamily: fonts.Medium,
-    marginBottom: 10,
-  },
-  confirmButtonWrapper: {
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-    padding: 10,
-    elevation: 2,
-    width: "70%",
-  },
-  confirmText: {
-    color: "white",
-    // fontFamily: fonts.SemiBold,
-    fontSize: 18,
+  generatedLetterText: {
+    fontSize: 16,
     textAlign: "center",
   },
-  profileModalView: {
-    position: 'absolute',
-    top: 100,
-    right: 10,
-    left: 10,
-    width: 395,
-   // backgroundColor: 'white',
-    backgroundColor: 'white',
-    padding: 10,
+  confirmButton: {
+    backgroundColor: "#2196F3",
     borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 10, // Ensure it's above other components
+    padding: 10,
+    elevation: 2,
+    marginBottom: 10,
+    width: '100%', // Ensure button takes full width inside modal
   },
-
-  profileContent: {
-    alignItems: "center",
-  },
-  profileText: {
-    // fontFamily: fonts.regular,
-    fontSize: 20,
-    marginTop: 10,
-  },
- 
-  logoutButton: {
-    marginTop: 70,
-    backgroundColor: '#FF6232',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 15,
-    marginBottom:66,
-  },
-  logoutText: {
-    // fontFamily: fonts.bold,
-    fontSize: 20,
-    color: colors.white,
-  },
-  footerContainer: {
-    // Styles for footer if needed
+  confirmButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });

@@ -40,13 +40,10 @@ const HomeScreen = () => {
   };
 
   return (
-    <ImageBackground
-      source={require("../assets/newbkkkkkkk2.jpg")} // Replace with your background image
-      style={styles.backgroundImage}
-    >
+    <View style={styles.container}>
       <View style={styles.overlay} />
 
-      <View style={styles.container}>
+      <View style={styles.contentContainer}>
         <View style={styles.header}>
           <View style={styles.profileContainer}>
             <Image
@@ -69,23 +66,22 @@ const HomeScreen = () => {
         <Text style={styles.title}>{titleWords}</Text>
         <Text style={styles.subTitle}>{subTitleWords}</Text>
       </View>
-    </ImageBackground>
+    </View>
   );
 };
 
 export default HomeScreen;
 
 const styles = StyleSheet.create({
-  backgroundImage: {
+  container: {
     flex: 1,
-    width: '100%',
-    height: '100%',
+    backgroundColor: colors.white,
   },
   overlay: {
     ...StyleSheet.absoluteFillObject, // Covers the entire screen
     backgroundColor: 'rgba(0, 0, 0, 0)', // Adjust opacity here
   },
-  container: {
+  contentContainer: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
@@ -121,7 +117,7 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   nameText: {
-    fontSize: 25, // Adjust font size
+    fontSize: 23, // Adjust font size
     fontFamily: fonts.SemiBold,
     color: 'black',
   },
@@ -142,7 +138,6 @@ const styles = StyleSheet.create({
     height: 100, // Adjust dimensions as needed
     resizeMode: 'contain',
     marginBottom: 20,
-  
   },
   title: {
     fontSize: 40,

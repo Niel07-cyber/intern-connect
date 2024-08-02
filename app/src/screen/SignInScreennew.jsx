@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Image, ImageBackground, useWindowDimensions } from 'react-native';
+import { StyleSheet, Text, View, Image, useWindowDimensions } from 'react-native';
 import Logo from '../assets/icc.jpg';
 import CustomButton from '../CustomButton/CustomButton';
 
@@ -25,64 +25,54 @@ const SignInScreen = ({ navigation }) => {
   };
 
   return (
-    <ImageBackground
-      source={require('../assets/newbkkkkk.jpg')} // Replace with your background image
-      style={styles.background}
-      resizeMode="cover"
-    >
-      <View style={styles.root}>
-        <Image
-          source={Logo}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        <Text style={styles.logoText}>Intern Connect</Text>
-        <View style={styles.profileContainer}>
-          <View style={[styles.profile, userPressed && styles.profilePressed]}>
-            <View style={styles.imageContainer}>
-              <Image
-                source={require("../assets/uuuuu.png")} // Replace with the path to your user profile image
-                style={[styles.profileIcon, userPressed && styles.profileIconPressed]}
-              />
-            </View>
-            <CustomButton
-              text="User"
-              onPress={onUserSignInPressed}
-              type="PRIMARY"
-              style={styles.button}
+    <View style={styles.root}>
+      <Image
+        source={Logo}
+        style={styles.logo}
+        resizeMode="contain"
+      />
+      <Text style={styles.logoText}>Intern Connect</Text>
+      <View style={styles.profileContainer}>
+        <View style={[styles.profile, userPressed && styles.profilePressed]}>
+          <View style={styles.imageContainer}>
+            <Image
+              source={require("../assets/uuuuu.png")} // Replace with the path to your user profile image
+              style={[styles.profileIcon, userPressed && styles.profileIconPressed]}
             />
           </View>
-          <View style={[styles.profile, adminPressed && styles.profilePressed]}>
-            <View style={styles.imageContainer}>
-              <Image
-                source={require("../assets/user.jpg")} // Replace with the path to your admin profile image
-                style={[styles.profileIcon, adminPressed && styles.profileIconPressed]}
-              />
-            </View>
-            <CustomButton
-              text="Admin"
-              onPress={onAdminSignInPressed}
-              type="PRIMARY"
-              style={styles.button}
+          <CustomButton
+            text="User"
+            onPress={onUserSignInPressed}
+            type="PRIMARY"
+            style={styles.button}
+          />
+        </View>
+        <View style={[styles.profile, adminPressed && styles.profilePressed]}>
+          <View style={styles.imageContainer}>
+            <Image
+              source={require("../assets/user.jpg")} // Replace with the path to your admin profile image
+              style={[styles.profileIcon, adminPressed && styles.profileIconPressed]}
             />
           </View>
+          <CustomButton
+            text="Admin"
+            onPress={onAdminSignInPressed}
+            type="PRIMARY"
+            style={styles.button}
+          />
         </View>
       </View>
-    </ImageBackground>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-  },
   root: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+    backgroundColor: '#FFFFFF', // Set background color to white
   },
   logo: {
     width: '100%',
@@ -91,7 +81,7 @@ const styles = StyleSheet.create({
     marginTop: -480,
   },
   logoText: {
-    fontSize: 24,
+    fontSize: 34,
     color: '#000', // Adjust color as needed
     marginBottom: 20,
   },

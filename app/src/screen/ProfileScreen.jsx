@@ -9,10 +9,10 @@ const ProfileScreen = ({ navigation }) => {
   };
 
   return (
-    <ImageBackground
-      source={require('../assets/newbkkkkk3.jpg')} // Replace with your background image
-      style={styles.backgroundImage}
-    >
+    // <ImageBackground
+    //   source={require('../assets/newbkkkkk3.jpg')} // Replace with your background image
+    //   style={styles.backgroundImage}
+    // >
       <View style={styles.container}>
         <ScrollView contentContainerStyle={styles.profileContent}>
           <Image
@@ -40,7 +40,7 @@ const ProfileScreen = ({ navigation }) => {
           </TouchableOpacity>
         </ScrollView>
       </View>
-    </ImageBackground>
+    // </ImageBackground>
   );
 };
 
@@ -53,6 +53,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: 'white',
   },
   profileImage: {
     width: 180, // Adjust dimensions as needed
