@@ -39,7 +39,7 @@ const [pdfUrl, setPdfUrl] = useState('');
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docRef = doc(db, "messages", "IkWesJof9uSaPw7dFD4euyAtv0L2"); // Replace "documentId" with the actual document ID
+        const docRef = doc(db, "messages", "YDGcSNwR3KXbrNGOEgcN9myjBIy2"); // Replace "documentId" with the actual document ID
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
@@ -104,6 +104,8 @@ const [pdfUrl, setPdfUrl] = useState('');
           }
           .recipient {
             margin-bottom: 20px;
+            max-width: 300px; /* Limit the width of the address */
+            word-wrap: break-word; /* Wrap text to the next line */
           }
           .recipient p {
             margin: 0;
@@ -135,32 +137,32 @@ const [pdfUrl, setPdfUrl] = useState('');
       <body>
         <div class="container">
           <div class="header">
-           <img src="${imageUrl}" alt="Institution Logo" />
+            <img src="${imageUrl}" alt="Institution Logo" />
             <h2>Kwame Nkrumah University of Science and Technology</h2>
           </div>
           <div class="address">
+           
+            <p>Our Ref: DCS.30/Vol.4</p>
+            <p>Department of Computer Science</p>
             <p>Date: ${new Date().toLocaleDateString()}</p>
-            <p>Address Line 1</p>
-            <p>Address Line 2</p>
-            <p>Kumasi, SG 573</p>
-            <p>0203823354</p>
-            <p>knustcos@yahoo.com</p>
           </div>
           <div class="recipient">
-            <p>${data.companyName}</p>
-            <p>Recipient's Position</p>
-            <p>${data.companyName}</p>
-            <p>${data.companyAddress}</p>
-            <p>Company Address Line 2</p>
-            <p>City, Postal Code</p>
+          <p>The Manager</p>
+            <p><strong>${data.companyName}</strong></p>
+            <p><strong>${data.companyAddress}</strong></p>
           </div>
           <div class="content">
             <p>Dear Sir/Madam,</p>
-            <p>This is to certify that ${data.name}, a student of ${data.course} with Student ID ${data.studentId} and Index No ${data.indexNo}, 
-            is currently in ${data.level} level at our institution.</p>
-            <p>A request has been made for an internship letter to be issued for ${data.companyName}, 
-            located at ${data.companyAddress}.</p>
-            <p>I hereby authorize ${data.name} to have an internship experience with your company to be able to build skills and get equipped.</p>
+            <p>This is to introduce to you <strong>${data.name}</strong>, a third-year undergraduate Student with Index number  <strong>${data.indexNo}</strong> and student number <strong>${data.studentId}</strong> of the Department of Computer 
+            Science, Kwame Nkrumah University of Science and Technology.</p>
+            
+            <p>As part of our program to train and equip our graduates for the industry, students from this Department
+            are to seek placements in appropriate establishments as yours to undertake a minimum of three weeks' hands-on job experience.</p>
+            
+            <p><strong>${data.name}</strong> has expressed interest in undertaking a vacation attachment at your end for this semester break.</p>
+            <p>It would be greatly appreciated if you could extend to him the necessary assistance for the period.</p>
+            
+            <p>Thank you.</p>
             <p>Sincerely,</p>
           </div>
           <div class="signature">
@@ -168,12 +170,12 @@ const [pdfUrl, setPdfUrl] = useState('');
             <p>Hayfron Acquah</p>
             <p>Head of Department (HOD)</p>
             <p>Kwame Nkrumah University of Science and Technology</p>
+            
           </div>
         </div>
       </body>
       </html>
     `;
-  
     try {
       const response = await axios.post(
         'https://api.pdf.co/v1/pdf/convert/from/html', 
@@ -199,21 +201,57 @@ const [pdfUrl, setPdfUrl] = useState('');
   
  const previewLetter = async () => {
     const letter = `
-      [Kwame Nkrumah University Of Science and Technology]
-      
-      Date: ${new Date().toLocaleDateString()}
-      
-      To whom it may concern,
-      
-      This is to certify that ${data.name}, a student of ${data.course} with Student ID ${data.studentId} and Index No ${data.indexNo}, 
-      is currently in ${data.level} level at our institution.
-      
-      A requested for an internship letter to be issued for ${data.companyName}, 
-      located at ${data.companyAddress}.
-      
-      Sincerely,
-      Hayfron Acquah
-      HOD
+      <html>
+<head>
+  <style>
+    @page { margin: 1in; }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #fff; }
+    .container { width: 100%; max-width: 800px; margin: 0 auto; padding: 20px; }
+    .header { text-align: center; margin-bottom: 30px; }
+    .header img { width: 100px; height: auto; }
+    .address { margin-bottom: 20px; }
+    .recipient { margin-bottom: 20px; }
+    .content { margin-bottom: 20px; }
+    .signature { margin-top: 40px; text-align: right; }
+    .signature img { width: 100px; height: auto; }
+    .footer { margin-top: 20px; text-align: center; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://th.bing.com/th/id/R.d6b7eeb68cc5706c6834c7a8e728e907?rik=x1zgW0k9qfD4yw&pid=ImgRaw&r=0" alt="Institution Logo" />
+      <h2>Kwame Nkrumah University of Science and Technology</h2>
+    </div>
+    <div class="address">
+      <p>Date: ${new Date().toLocaleDateString()}</p>
+      <p>Kwame Nkrumah University of Science and Technology</p>
+      <p>Kumasi, SG 573</p>
+      <p>Ghana</p>
+    </div>
+    <div class="recipient">
+      <p>To Whom It May Concern,</p>
+    </div>
+    <div class="content">
+      <p>This is to certify that ${data.name}, a student of ${data.course} with Student ID ${data.studentId} and Index No ${data.indexNo}, 
+      is currently in ${data.level} level at our institution.</p>
+      <p>A request has been made for an internship letter to be issued for ${data.companyName}, 
+      located at ${data.companyAddress}.</p>
+      <p>We request you to kindly consider this student for the internship as per the request.</p>
+    </div>
+    <div class="signature">
+      <p>Sincerely,</p>
+      <p><img src="https://th.bing.com/th/id/R.938942ebf592b4ffd367e29aa7412466?rik=ZSuqBkY0R24v5Q&riu=http%3a%2f%2fwww.clipartbest.com%2fcliparts%2f9iz%2fLEd%2f9izLEdR4T.jpg&ehk=C0ojxdfIONA2Tb%2fZ48eteAgg2Z37AYwpSj%2fNG7cCkqM%3d&risl=&pid=ImgRaw&r=0" alt="Signature" /></p>
+      <p>Hayfron Acquah</p>
+      <p>Head of Department (HOD)</p>
+      <p>Kwame Nkrumah University of Science and Technology</p>
+    </div>
+    <div class="footer">
+      <p>0203823354 | knustcos@yahoo.com</p>
+    </div>
+  </div>
+</body>
+</html>
     `;
 
  
@@ -278,18 +316,15 @@ const [pdfUrl, setPdfUrl] = useState('');
           `}
         </Text>
       </ScrollView>
-      <TouchableOpacity style={styles.confirmButton} onPress={handleProceed}>
-        <Text style={styles.confirmButtonText}>Preview Letter</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.confirmButton} onPress={() => sendEmailAsPdf()}>
-        <Text style={styles.confirmButtonText}>Send Email as PDF</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.confirmButton} onPress={() => {/* Select Students Logic */}}>
-        <Text style={styles.confirmButtonText}>Select Students</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.confirmButton} onPress={hideModal}>
-        <Text style={styles.confirmButtonText}>Close</Text>
-      </TouchableOpacity>
+      <TouchableOpacity style={styles.modalButton} onPress={handleProceed}>
+              <Text style={styles.modalButtonText}>Preview Letter</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalButton} onPress={sendEmailAsPdf}>
+              <Text style={styles.modalButtonText}>Send Email as PDF</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalButton} onPress={hideModal}>
+              <Text style={styles.modalButtonText}>Close</Text>
+            </TouchableOpacity>
     </View>
   </View>
 )}
@@ -513,6 +548,20 @@ const styles = StyleSheet.create({
     width: '100%', // Ensure button takes full width inside modal
   },
   confirmButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+
+  modalButton: {
+    backgroundColor: "#2196F3",
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+    marginBottom: 10,
+    width: '80%', // Ensure button takes full width inside modal
+  },
+  modalButtonText: {
     color: "white",
     fontWeight: "bold",
     textAlign: "center",
